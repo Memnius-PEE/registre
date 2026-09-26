@@ -1,0 +1,38 @@
+{
+  "schema": "memnius-registre/1",
+  "genere_le": "2026-09-26T19:45:35+00:00",
+  "source": "https://github.com/Memnius-PEE",
+  "sujets": [
+    {
+      "id": "optique-ondulatoire",
+      "fiche": null,
+      "depot": {
+        "chemin": "Memnius-PEE/optique-ondulatoire",
+        "url": "https://github.com/Memnius-PEE/optique-ondulatoire",
+        "branche": "main",
+        "dernier_commit": null,
+        "derniere_activite": "2026-09-26T19:42:38Z",
+        "archive_forge": false,
+        "etoiles": 0,
+        "tickets_ouverts": 0,
+        "branche_protegee": null,
+        "decisions": 0
+      },
+      "conformite": {
+        "niveau": "non-conforme",
+        "erreurs": [
+          "fichier obligatoire absent : README.md",
+          "fichier obligatoire absent : AGENTS.md",
+          "fichier obligatoire absent : memnius.yaml",
+          "fichier obligatoire absent : PASSATION.md",
+          "journal de décisions absent ou vide : decisions/NNNN.md"
+        ],
+        "avertissements": [
+          "fichier recommandé absent : CONTRIBUTING.md",
+          "fichier recommandé absent : .github/workflows/memnius.yml"
+        ]
+      },
+      "archiviste": null
+    }
+  ]
+}
