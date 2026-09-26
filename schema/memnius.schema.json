@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fiche memnius.yaml d'un dépôt de sujet",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "titre",
+    "resume",
+    "statut",
+    "nature",
+    "domaines",
+    "langue",
+    "mainteneurs",
+    "agents",
+    "socle",
+    "licence",
+    "visibilite",
+    "cree_le"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 64
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    }
+  },
+  "properties": {
+    "schema": {
+      "const": "memnius/1"
+    },
+    "id": {
+      "$ref": "#/$defs/slug"
+    },
+    "titre": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "resume": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 600
+    },
+    "statut": {
+      "enum": [
+        "idee",
+        "actif",
+        "en-pause",
+        "termine",
+        "archive"
+      ]
+    },
+    "nature": {
+      "enum": [
+        "etude",
+        "lecture",
+        "outil",
+        "donnees",
+        "projet"
+      ]
+    },
+    "domaines": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/slug"
+      }
+    },
+    "mots_cles": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "maxLength": 40
+      }
+    },
+    "langue": {
+      "type": "string",
+      "pattern": "^[a-z]{2}$"
+    },
+    "mainteneurs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "github"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "github": {
+            "type": "string",
+            "minLength": 1,
+            "description": "identifiant GitHub"
+          },
+          "nom": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "contribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ouverte": {
+          "type": "boolean"
+        },
+        "niveau_entree": {
+          "enum": [
+            "facile",
+            "moyen",
+            "expert"
+          ]
+        }
+      }
+    },
+    "outils": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/slug"
+      }
+    },
+    "agents": {
+      "type": "object",
+      "required": [
+        "politique"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "politique": {
+          "enum": [
+            "libre",
+            "relecture-humaine",
+            "interdit"
+          ]
+        }
+      }
+    },
+    "liens": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sujets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "relation"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/slug"
+              },
+              "relation": {
+                "enum": [
+                  "prolonge",
+                  "depend-de",
+                  "remplace",
+                  "voir-aussi"
+                ]
+              }
+            }
+          }
+        },
+        "externes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "titre": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https?://"
+              }
+            }
+          }
+        }
+      }
+    },
+    "socle": {
+      "type": "object",
+      "required": [
+        "version",
+        "niveau"
+      ],
+      "additionalProperties": false,
+      "description": "Version du socle commun suivie et niveau adopté (REGLES.md du projet Memnius-PEE/regles)",
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^v[0-9]+$"
+        },
+        "niveau": {
+          "enum": [
+            "socle",
+            "recommande",
+            "renforce"
+          ]
+        },
+        "options": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^O[0-9]+$"
+          }
+        }
+      }
+    },
+    "licence": {
+      "type": "string",
+      "minLength": 2
+    },
+    "visibilite": {
+      "enum": [
+        "public",
+        "prive"
+      ]
+    },
+    "archivage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "politique": {
+          "enum": [
+            "standard",
+            "prioritaire",
+            "exclure",
+            "local-seulement"
+          ]
+        },
+        "exclure": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "cree_le": {
+      "$ref": "#/$defs/date"
+    }
+  }
+}

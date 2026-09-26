@@ -1,0 +1,51 @@
+# Dépôt Memnius-PEE/registre : reconstruit le registre chaque nuit et à la demande (onglet Actions → Run workflow).
+#
+# Lecture des sujets : pour les dépôts publics, le jeton du workflow suffit. Pour lire aussi les dépôts
+# privés, installer la GitHub App dédiée « memnius-registre » (décision 0007 du socle : permissions
+# Contents et Metadata en lecture seule, sur tous les dépôts de l'organisation) et renseigner
+# la variable MEMNIUS_APP_ID et le secret MEMNIUS_APP_CLE (clé privée de l'App).
+# Écriture : seul ce dépôt est modifié, par le jeton du workflow (contents: write), sous le nom github-actions[bot].
+name: Registre
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: registre
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pyyaml jsonschema
+      - name: Jeton de lecture de l'App memnius-registre
+        id: app
+        if: ${{ vars.MEMNIUS_APP_ID != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.MEMNIUS_APP_ID }}
+          private-key: ${{ secrets.MEMNIUS_APP_CLE }}
+          owner: ${{ github.repository_owner }}
+      - name: État publié par l'archiviste (absent tant que l'archiviste n'existe pas)
+        run: |
+          git clone --quiet --depth 1 "https://github.com/${{ github.repository_owner }}/archives.git" /tmp/archives || true
+      - name: Construire
+        env:
+          GITHUB_TOKEN: ${{ steps.app.outputs.token || github.token }}
+        run: |
+          ARCHIVISTE=""; [ -f /tmp/archives/etat.json ] && ARCHIVISTE="--archiviste /tmp/archives/etat.json"
+          python3 outils/memnius.py construire --github "${{ github.repository_owner }}" $ARCHIVISTE --sortie .
+      - name: Publier
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add registre.json REGISTRE.md
+          git diff --cached --quiet || git commit -m "Registre regénéré (exécution ${{ github.run_id }})"
+          git push

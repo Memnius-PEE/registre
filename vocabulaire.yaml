@@ -1,0 +1,23 @@
+# Vocabulaire contrôlé du groupe (liste fermée). Seule partie du registre éditée à la main,
+# par demande de fusion validée par le comité du socle. Ajouter un terme ici avant de l'utiliser dans memnius.yaml.
+domaines:
+  physique: Physique
+  mathematiques: Mathématiques
+  informatique: Informatique
+  ia: Intelligence artificielle
+  histoire: Histoire
+  philosophie: Philosophie
+  methodologie: Méthodologie et outils du groupe
+outils:
+  python: Python
+  jupyter: Jupyter
+  latex: LaTeX
+  zotero: Zotero
+  obsidian: Obsidian
+  r: R
+  julia: Julia
+  markdown: Markdown seul
+socle:
+  # Versions publiées du socle (projet Memnius-PEE/regles), la plus récente en dernier.
+  # Le registre signale les sujets qui suivent une version plus ancienne.
+  versions: [v1]

@@ -1,0 +1,17 @@
+# Toute pull request sur l'outil, les schémas ou le vocabulaire : ils doivent rester lisibles et cohérents.
+name: Tests
+on: [pull_request]
+jobs:
+  tester:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pyyaml jsonschema
+      - run: |
+          python3 -m json.tool schema/memnius.schema.json > /dev/null
+          python3 -m json.tool schema/registre.schema.json > /dev/null
+          python3 -c "import yaml; yaml.safe_load(open('vocabulaire.yaml'))"
+          python3 outils/memnius.py --help > /dev/null
