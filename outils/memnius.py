@@ -179,7 +179,7 @@ class GitHub:
                 corps = rep.read()
                 return (corps.decode("utf-8") if brut else json.loads(corps)), rep.headers
         except urllib.error.HTTPError as exc:
-            if exc.code == 404:
+            if exc.code in (404, 409):  # 409 : dépôt vide
                 return None, {}
             raise
 
@@ -196,7 +196,8 @@ class GitHub:
 def entree_github(gh, depot, vocab):
     nom, branche = depot["full_name"], depot.get("default_branch")
     fichiers, texte, commit, protegee = set(), None, None, None
-    if branche and not depot.get("size") == 0:
+    # Ne pas se fier à depot["size"] : GitHub le calcule en différé et le laisse à 0 sur un dépôt récent.
+    if branche:
         arbre, _ = gh.get(f"/repos/{nom}/git/trees/{urllib.parse.quote(branche, safe='')}", recursive="1")
         fichiers = {e["path"] for e in (arbre or {}).get("tree", []) if e["type"] == "blob"}
         if "memnius.yaml" in fichiers:
