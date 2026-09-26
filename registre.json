@@ -1,36 +1,84 @@
 {
   "schema": "memnius-registre/1",
-  "genere_le": "2026-09-26T19:45:35+00:00",
+  "genere_le": "2026-09-26T19:53:06+00:00",
   "source": "https://github.com/Memnius-PEE",
   "sujets": [
     {
       "id": "optique-ondulatoire",
-      "fiche": null,
+      "fiche": {
+        "schema": "memnius/1",
+        "id": "optique-ondulatoire",
+        "titre": "Optique ondulatoire",
+        "resume": "Étudier interférences et diffraction de la lumière, des fentes d'Young aux réseaux, avec des calculs simples et des manipulations faisables à la maison.",
+        "statut": "actif",
+        "nature": "etude",
+        "domaines": [
+          "physique"
+        ],
+        "mots_cles": [
+          "interferences",
+          "diffraction",
+          "fentes-young",
+          "reseaux"
+        ],
+        "langue": "fr",
+        "mainteneurs": [
+          {
+            "github": "Pwouette",
+            "nom": "Romain"
+          }
+        ],
+        "contribution": {
+          "ouverte": true,
+          "niveau_entree": "facile"
+        },
+        "outils": [
+          "python",
+          "markdown"
+        ],
+        "agents": {
+          "politique": "relecture-humaine"
+        },
+        "liens": {
+          "sujets": [],
+          "externes": [
+            {
+              "titre": "Cours d'optique ondulatoire (Wikiversité)",
+              "url": "https://fr.wikiversity.org/wiki/Optique_ondulatoire"
+            }
+          ]
+        },
+        "socle": {
+          "version": "v1",
+          "niveau": "recommande",
+          "options": []
+        },
+        "licence": "CC-BY-4.0",
+        "visibilite": "public",
+        "archivage": {
+          "politique": "standard",
+          "exclure": [
+            "donnees/brut/**"
+          ]
+        },
+        "cree_le": "2026-09-26"
+      },
       "depot": {
         "chemin": "Memnius-PEE/optique-ondulatoire",
         "url": "https://github.com/Memnius-PEE/optique-ondulatoire",
         "branche": "main",
-        "dernier_commit": null,
+        "dernier_commit": "d6ba13416b611179b77bf1bd92394ddb1640acf8",
         "derniere_activite": "2026-09-26T19:42:38Z",
         "archive_forge": false,
         "etoiles": 0,
         "tickets_ouverts": 0,
-        "branche_protegee": null,
-        "decisions": 0
+        "branche_protegee": true,
+        "decisions": 2
       },
       "conformite": {
-        "niveau": "non-conforme",
-        "erreurs": [
-          "fichier obligatoire absent : README.md",
-          "fichier obligatoire absent : AGENTS.md",
-          "fichier obligatoire absent : memnius.yaml",
-          "fichier obligatoire absent : PASSATION.md",
-          "journal de décisions absent ou vide : decisions/NNNN.md"
-        ],
-        "avertissements": [
-          "fichier recommandé absent : CONTRIBUTING.md",
-          "fichier recommandé absent : .github/workflows/memnius.yml"
-        ]
+        "niveau": "conforme",
+        "erreurs": [],
+        "avertissements": []
       },
       "archiviste": null
     }
