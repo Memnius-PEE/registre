@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/1",
-  "genere_le": "2026-09-26T19:53:06+00:00",
+  "genere_le": "2026-09-27T08:16:42+00:00",
   "source": "https://github.com/Memnius-PEE",
   "sujets": [
     {
@@ -74,6 +74,91 @@
         "tickets_ouverts": 0,
         "branche_protegee": true,
         "decisions": 2
+      },
+      "conformite": {
+        "niveau": "conforme",
+        "erreurs": [],
+        "avertissements": []
+      },
+      "archiviste": null
+    },
+    {
+      "id": "archiviste-local",
+      "fiche": {
+        "schema": "memnius/1",
+        "id": "archiviste-local",
+        "titre": "Archiviste sur modèles locaux",
+        "resume": "Concevoir l'archiviste du groupe : un agent qui tient une fiche d'archive par dépôt, alimente le registre et scelle les sujets endormis, en s'appuyant sur des modèles d'IA locaux (essaim LocalAI).",
+        "statut": "actif",
+        "nature": "etude",
+        "domaines": [
+          "ia",
+          "methodologie"
+        ],
+        "mots_cles": [
+          "archivage",
+          "localai",
+          "modeles-locaux",
+          "llm",
+          "git",
+          "registre",
+          "essaim"
+        ],
+        "langue": "fr",
+        "mainteneurs": [
+          {
+            "github": "Pwouette",
+            "nom": "Romain"
+          }
+        ],
+        "contribution": {
+          "ouverte": true,
+          "niveau_entree": "moyen"
+        },
+        "outils": [
+          "python",
+          "markdown"
+        ],
+        "agents": {
+          "politique": "relecture-humaine"
+        },
+        "liens": {
+          "sujets": [],
+          "externes": [
+            {
+              "titre": "Documentation de LocalAI",
+              "url": "https://localai.io/"
+            },
+            {
+              "titre": "Socle commun Memnius (règles v1)",
+              "url": "https://github.com/Memnius-PEE/regles/blob/v1/REGLES.md"
+            }
+          ]
+        },
+        "socle": {
+          "version": "v1",
+          "niveau": "recommande",
+          "options": []
+        },
+        "licence": "CC-BY-4.0",
+        "visibilite": "public",
+        "archivage": {
+          "politique": "standard",
+          "exclure": []
+        },
+        "cree_le": "2026-09-26"
+      },
+      "depot": {
+        "chemin": "Memnius-PEE/archiviste-local",
+        "url": "https://github.com/Memnius-PEE/archiviste-local",
+        "branche": "main",
+        "dernier_commit": "42a8b39a519781823871d74f61c0e1b885ad3ff0",
+        "derniere_activite": "2026-09-26T20:47:47Z",
+        "archive_forge": false,
+        "etoiles": 0,
+        "tickets_ouverts": 0,
+        "branche_protegee": true,
+        "decisions": 4
       },
       "conformite": {
         "niveau": "conforme",
