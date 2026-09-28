@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/1",
-  "genere_le": "2026-09-27T08:16:42+00:00",
+  "genere_le": "2026-09-28T06:27:33+00:00",
   "source": "https://github.com/Memnius-PEE",
   "sujets": [
     {
@@ -152,13 +152,13 @@
         "chemin": "Memnius-PEE/archiviste-local",
         "url": "https://github.com/Memnius-PEE/archiviste-local",
         "branche": "main",
-        "dernier_commit": "42a8b39a519781823871d74f61c0e1b885ad3ff0",
-        "derniere_activite": "2026-09-26T20:47:47Z",
+        "dernier_commit": "39a649730046e794b6d53bd0ad18efbc5e355951",
+        "derniere_activite": "2026-09-27T14:13:32Z",
         "archive_forge": false,
         "etoiles": 0,
         "tickets_ouverts": 0,
         "branche_protegee": true,
-        "decisions": 4
+        "decisions": 7
       },
       "conformite": {
         "niveau": "conforme",
