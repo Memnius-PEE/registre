@@ -1,6 +1,6 @@
 # Registre des sujets Memnius
 
-_Généré le 2026-10-01T09:01:53+00:00 depuis `https://github.com/Memnius-PEE`. Ne pas éditer : modifier le `memnius.yaml` du sujet._
+_Généré le 2026-10-02T08:36:55+00:00 depuis `https://github.com/Memnius-PEE`. Ne pas éditer : modifier le `memnius.yaml` du sujet._
 
 | Sujet | Statut | Domaines | Mainteneur·ices | Entrée | Agents | Socle | Dernière activité | Conformité |
 |---|---|---|---|---|---|---|---|---|
