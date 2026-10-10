@@ -1,0 +1,50 @@
+# Workflow réutilisable : gardes du socle, appelées par chaque projet
+#   jobs:
+#     gardes:
+#       uses: Memnius-PEE/registre/.github/workflows/gardes.yml@v2
+# Bloque la fusion si le socle n'est pas respecté (le ruleset du projet exige ce contrôle, garde A1).
+name: Gardes Memnius
+on:
+  workflow_call:
+    inputs:
+      socle:
+        description: Étiquette du socle (dépôt registre de l'organisation)
+        type: string
+        default: v2
+
+permissions:
+  contents: read
+
+jobs:
+  gardes:
+    name: Gardes A2 à A7
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # A4 compare le journal au commit de base
+          lfs: false       # A6 mesure les pointeurs LFS, pas les fichiers
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pyyaml jsonschema
+      - name: Outils communs
+        run: git clone --quiet --depth 1 --branch "${{ inputs.socle }}" "https://github.com/${{ github.repository_owner }}/registre.git" /tmp/registre-commun
+      - name: Gardes
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python3 /tmp/registre-commun/outils/gardes.py --base "$BASE" .
+
+  secrets:
+    name: A2, second filet (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          docker run --rm -v "$PWD:/depot" ghcr.io/gitleaks/gitleaks:v8.18.4 \
+            detect --source /depot --no-banner --redact --verbose --log-opts="${BASE:+$BASE..}HEAD"

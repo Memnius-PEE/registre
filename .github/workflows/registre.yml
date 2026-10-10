@@ -1,0 +1,57 @@
+# Super-registre : chaque nuit et à la demande (onglet Actions → Run workflow), lit la fiche et l'index
+# du registre de chaque projet de l'organisation, puis publie REGISTRE.md, CARTES.md et registre.json
+# sur la branche « super-registre » de ce dépôt.
+#
+# Pourquoi une branche à part : main est protégée (garde A1) et n'accepte que des pull requests relues ;
+# les fichiers générés vont donc sur « super-registre », que le ruleset de main ne couvre pas.
+#
+# Lecture des projets : pour les dépôts publics, le jeton du workflow suffit. Pour lire aussi les dépôts
+# privés, installer la GitHub App dédiée « memnius-registre » (décision 0007 : permissions Contents et
+# Metadata en lecture seule, sur tous les dépôts de l'organisation) et renseigner la variable
+# MEMNIUS_APP_ID et le secret MEMNIUS_APP_CLE (clé privée de l'App).
+name: Super-registre
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: registre
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pyyaml jsonschema
+      - name: Jeton de lecture de l'App memnius-registre
+        id: app
+        if: ${{ vars.MEMNIUS_APP_ID != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.MEMNIUS_APP_ID }}
+          private-key: ${{ secrets.MEMNIUS_APP_CLE }}
+          owner: ${{ github.repository_owner }}
+      - name: Construire
+        env:
+          GITHUB_TOKEN: ${{ steps.app.outputs.token || github.token }}
+        run: python3 outils/memnius.py registre --github "${{ github.repository_owner }}" --sortie /tmp/sortie
+      - name: Publier sur la branche super-registre
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch --quiet origin super-registre; then
+            git worktree add --quiet /tmp/branche origin/super-registre && git -C /tmp/branche switch --quiet -C super-registre
+          else
+            git worktree add --quiet --orphan -b super-registre /tmp/branche
+          fi
+          cp /tmp/sortie/REGISTRE.md /tmp/sortie/CARTES.md /tmp/sortie/registre.json /tmp/branche/
+          cd /tmp/branche
+          git add REGISTRE.md CARTES.md registre.json
+          git diff --cached --quiet || git commit --quiet -m "Super-registre regénéré (exécution ${{ github.run_id }})"
+          git push --quiet origin super-registre

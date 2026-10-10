@@ -1,0 +1,31 @@
+# Fiche d'identité du projet, lue par la garde A3 et le super-registre du groupe.
+# Schéma : https://github.com/Memnius-PEE/registre/blob/v2/schema/memnius.schema.json
+# Créée par « memnius.py init ». Ne modifier que les valeurs ; les champs marqués (facultatif) peuvent être supprimés.
+schema: memnius/2
+id: {{id}}             # identique au nom du dépôt GitHub, en minuscules-avec-tirets
+titre: {{titre}}
+resume: >-
+  RÉSUMÉ_EN_UNE_À_TROIS_PHRASES
+statut: actif                  # idee | actif | en-pause | termine | archive
+nature: etude                  # etude | lecture | outil | donnees | projet
+domaines: [DOMAINE]            # vocabulaire contrôlé : vocabulaire.yaml du dépôt registre
+mots_cles: []                  # (facultatif) libres
+langue: fr
+mainteneurs:
+  - github: {{mainteneur}}
+contribution:
+  ouverte: true                # accepte-t-on de nouveaux contributeurs ?
+  niveau_entree: facile        # facile | moyen | expert
+outils: []                     # (facultatif) ex. [python, jupyter, latex, zotero, obsidian]
+agents:
+  politique: relecture-humaine # libre | relecture-humaine | interdit
+liens:                         # (facultatif)
+  projets: []                  # ex. [{id: autre-projet, relation: prolonge}]
+  externes: []                 # ex. [{titre: Article de référence, url: https://…}]
+socle:                         # socle commun suivi (Memnius-PEE/registre, REGLES.md)
+  version: v2
+  niveau: socle                # socle | recommande (dépôt à agents, R1–R8) | renforce (options O1–O8)
+  options: []                  # options adoptées, chacune par une entrée de decisions/, ex. [O6]
+licence: CC-BY-4.0             # identifiant SPDX
+visibilite: public             # public | prive (un dépôt privé n'a pas de garde A1 en offre gratuite)
+cree_le: {{date}}

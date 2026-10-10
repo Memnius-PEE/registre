@@ -1,0 +1,19 @@
+# Chaque garde est testée dans les deux sens à chaque changement du socle ; schémas et vocabulaire restent lisibles.
+name: Tests des gardes
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  tester:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pyyaml jsonschema
+      - run: |
+          for s in schema/*.json; do python3 -m json.tool "$s" > /dev/null; done
+          python3 -c "import yaml; yaml.safe_load(open('vocabulaire.yaml')); yaml.safe_load(open('regles.yaml'))"
+      - run: python3 -m unittest discover -s tests -v

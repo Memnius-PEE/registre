@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "memnius/1/registre.schema.json",
+  "title": "Registre unifié Memnius (fichier généré, ne pas éditer à la main)",
+  "type": "object",
+  "required": [
+    "schema",
+    "genere_le",
+    "source",
+    "sujets"
+  ],
+  "properties": {
+    "schema": {
+      "const": "memnius-registre/1"
+    },
+    "genere_le": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "description": "Organisation(s) GitHub ou dossier local parcouru"
+    },
+    "sujets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "fiche",
+          "depot",
+          "conformite"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fiche": {
+            "description": "Contenu de memnius.yaml tel que déclaré (null si absent ou illisible)",
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "depot": {
+            "type": "object",
+            "description": "Faits calculés depuis Git/GitHub, jamais déclarés à la main",
+            "properties": {
+              "chemin": {
+                "type": "string"
+              },
+              "url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "branche": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "dernier_commit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "derniere_activite": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "etoiles": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "tickets_ouverts": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "branche_protegee": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Garde A1 : main protégée sans push direct ni force-push (null : inconnu)"
+              },
+              "decisions": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Nombre d'entrées du journal decisions/"
+              },
+              "archive_forge": {
+                "type": "boolean"
+              }
+            }
+          },
+          "conformite": {
+            "type": "object",
+            "required": [
+              "niveau",
+              "erreurs",
+              "avertissements"
+            ],
+            "properties": {
+              "niveau": {
+                "enum": [
+                  "conforme",
+                  "avertissements",
+                  "non-conforme"
+                ]
+              },
+              "erreurs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "avertissements": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "archiviste": {
+            "description": "Réservé à l'archiviste : rempli par lui, ignoré par le constructeur du registre",
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "derniere_fiche": {
+                "type": "string",
+                "description": "Chemin ou URL de la dernière fiche d'archive"
+              },
+              "commit_archive": {
+                "type": "string",
+                "description": "Commit archivé en dernier ; comparé à depot.dernier_commit pour savoir quoi réarchiver"
+              },
+              "archive_le": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

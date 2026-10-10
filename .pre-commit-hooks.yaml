@@ -1,0 +1,13 @@
+# Crochets pre-commit publiés par le socle (facultatifs : la CI reste le seul verrou).
+- id: memnius-gardes
+  name: Gardes Memnius A2 et A6
+  entry: outils/gardes.py --seulement A2,A6
+  language: script
+  pass_filenames: false
+  always_run: true
+- id: memnius-index
+  name: Index du registre du projet (garde A7, demande PyYAML)
+  entry: outils/memnius.py index
+  language: script
+  pass_filenames: false
+  always_run: true

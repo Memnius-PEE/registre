@@ -1,0 +1,40 @@
+# Liste des règles et gardes du socle Memnius, lue par la garde A5 (renvois aux règles).
+# Une règle retirée garde son numéro et passe à « abrogee: true » ; on ne supprime jamais une ligne.
+# Le texte de référence est REGLES.md ; ce fichier n'en garde que les identifiants et les titres.
+version: v2
+regles:
+  C1: {titre: Histoire en ajout seul, niveau: socle}
+  C2: {titre: Décision écrite, niveau: socle}
+  C3: {titre: Les règles appartiennent aux mainteneurs, niveau: socle}
+  C4: {titre: Origine marquée, niveau: socle}
+  C5: {titre: Source ou « non vérifié », niveau: socle}
+  C6: {titre: Second regard, niveau: socle}
+  C7: {titre: Rien ne sort sans accord, niveau: socle}
+  C8: {titre: Dans le doute, on demande, niveau: socle}
+  C9: {titre: Passation en fin de session, niveau: socle}
+  C10: {titre: Langue de l'interlocuteur, niveau: socle}
+  C11: {titre: Registre du projet tenu à jour, niveau: socle, depuis: v2}
+  R1: {titre: Se présenter avant d'agir, niveau: recommande}
+  R2: {titre: Brouillons à part, niveau: recommande}
+  R3: {titre: Délégation tracée, niveau: recommande}
+  R4: {titre: Annoncer les grands essaims, niveau: recommande}
+  R5: {titre: Trois allers-retours, puis escalade, niveau: recommande}
+  R6: {titre: Copier, jamais paraphraser, niveau: recommande}
+  R7: {titre: Test des deux mondes, niveau: recommande}
+  R8: {titre: Échecs consignés, niveau: recommande}
+  O1: {titre: Dépôt de quarantaine séparé, niveau: option}
+  O2: {titre: Empreintes des gardes, niveau: option}
+  O3: {titre: Contrôles de sabotage, niveau: option}
+  O4: {titre: Journal de conversation, niveau: option}
+  O5: {titre: Crochets d'agent, niveau: option}
+  O6: {titre: Zones interdites, niveau: option}
+  O7: {titre: Langue et vocabulaire, niveau: option}
+  O8: {titre: Correction à côté, niveau: option}
+gardes:
+  A1: {titre: Branche protégée, ou: ruleset GitHub (contrôlé par le super-registre)}
+  A2: {titre: Secrets, ou: CI et pre-commit}
+  A3: {titre: Structure, ou: CI}
+  A4: {titre: Journal en ajout seul, ou: CI}
+  A5: {titre: Renvois aux règles, ou: CI}
+  A6: {titre: Gros fichiers, ou: CI et pre-commit, seuil_octets: 10000000}
+  A7: {titre: Registre du projet, ou: CI, depuis: v2}
