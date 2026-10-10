@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/2",
-  "genere_le": "2026-10-10T21:43:10+00:00",
+  "genere_le": "2026-10-10T22:43:53+00:00",
   "source": "https://github.com/Memnius-PEE",
   "projets": [
     {
@@ -50,7 +50,6 @@
         },
         "socle": {
           "version": "v2",
-          "niveau": "recommande",
           "options": []
         },
         "licence": "CC-BY-4.0",
@@ -61,8 +60,8 @@
         "chemin": "Memnius-PEE/optique-ondulatoire",
         "url": "https://github.com/Memnius-PEE/optique-ondulatoire",
         "branche": "main",
-        "dernier_commit": "0cc2c78a767d35bfd693ad7555dae73240b86234",
-        "derniere_activite": "2026-10-10T21:42:23Z",
+        "dernier_commit": "3a7241c2acbdcc4480a53bbb58ad6d88f5af085a",
+        "derniere_activite": "2026-10-10T22:42:40Z",
         "archive_forge": false,
         "etoiles": 0,
         "tickets_ouverts": 0,
@@ -78,7 +77,7 @@
         "projet": "optique-ondulatoire",
         "titre": "Optique ondulatoire",
         "comptes": {
-          "decision": 4,
+          "decision": 5,
           "code": 1,
           "donnees": 0,
           "sources": 2
@@ -156,6 +155,24 @@
               "humain"
             ],
             "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0004-decisions-dans-le-registre.md"
+          },
+          {
+            "type": "decision",
+            "id": "decisions/0005",
+            "fichier": "registre/decisions/0005-socle-v2-revise.md",
+            "titre": "0005 — Suivre le socle v2 révisé",
+            "resume": "Le projet suit le socle v2 révisé. PASSATION.md est retiré : ce qui reste à faire est dans le README, et le piège sur les unités est noté dans la carte `registre/code/interfrange.md`. `memnius.yaml` ne déclare plus de niveau. L'index du registre est désormais écrit par la CI sur chaque pull request…",
+            "ou": [
+              "registre/decisions/0005-socle-v2-revise.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-10-10",
+            "origine": [
+              "humain"
+            ],
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0005-socle-v2-revise.md"
           },
           {
             "type": "code",

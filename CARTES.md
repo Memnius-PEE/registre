@@ -1,8 +1,8 @@
 # Toutes les cartes des projets Memnius
 
-_Généré le 2026-10-10T21:43:10+00:00 à partir du `registre/index.json` de chaque projet. Ne pas éditer. Vue par projet : [REGISTRE.md](REGISTRE.md)._
+_Généré le 2026-10-10T22:43:53+00:00 à partir du `registre/index.json` de chaque projet. Ne pas éditer. Vue par projet : [REGISTRE.md](REGISTRE.md)._
 
-## Décisions (4)
+## Décisions (5)
 
 | Projet | Carte | Résumé | Qui |
 |---|---|---|---|
@@ -10,6 +10,7 @@ _Généré le 2026-10-10T21:43:10+00:00 à partir du `registre/index.json` de ch
 | optique-ondulatoire | [0002 — Calculs en Python sans dépendance](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0002-calculs-sans-dependance.md) | Les scripts de `travaux/` n'utilisent que la bibliothèque standard tant qu'aucun tracé n'est nécessaire. | @Pwouette |
 | optique-ondulatoire | [0003 — Passer au socle v2 et tenir le registre du projet](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0003-passer-au-socle-v2.md) | Le projet suit désormais le socle v2 (règles C1–C11, gardes A1–A7). Chaque script, jeu de données ou source notable a sa carte dans `registre/`, et l'index `registre/INDEX.md` est régénéré à chaque changement. | @Pwouette |
 | optique-ondulatoire | [0004 — Ranger le journal des décisions dans le registre](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0004-decisions-dans-le-registre.md) | Le journal passe de `decisions/` à `registre/decisions/`, avec son historique : tout ce qui décrit le projet est dans `registre/`. Les entrées 0001 à 0003 sont déplacées telles quelles ; les chemins `decisions/` qu'elles citent désignent désormais `registre/decisions/`. | @Pwouette |
+| optique-ondulatoire | [0005 — Suivre le socle v2 révisé](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0005-socle-v2-revise.md) | Le projet suit le socle v2 révisé. PASSATION.md est retiré : ce qui reste à faire est dans le README, et le piège sur les unités est noté dans la carte `registre/code/interfrange.md`. `memnius.yaml` ne déclare plus de niveau. L'index du registre est désormais écrit par la CI sur chaque pull request… | @Pwouette |
 
 ## Code (1)
 
@@ -32,4 +33,4 @@ _Aucune carte._
 
 | Personne | Projet | Décisions | Code | Données | Sources |
 |---|---|---|---|---|---|
-| @Pwouette | optique-ondulatoire | [0001](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0001-adopter-le-socle.md), [0002](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0002-calculs-sans-dependance.md), [0003](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0003-passer-au-socle-v2.md), [0004](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0004-decisions-dans-le-registre.md) | [interfrange](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) |  | [hecht-optics](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/hecht-optics.md), [wikiversite-optique](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/wikiversite-optique.md) |
+| @Pwouette | optique-ondulatoire | [0001](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0001-adopter-le-socle.md), [0002](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0002-calculs-sans-dependance.md), [0003](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0003-passer-au-socle-v2.md), [0004](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0004-decisions-dans-le-registre.md), [0005](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0005-socle-v2-revise.md) | [interfrange](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) |  | [hecht-optics](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/hecht-optics.md), [wikiversite-optique](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/wikiversite-optique.md) |
