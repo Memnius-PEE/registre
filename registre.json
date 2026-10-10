@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/2",
-  "genere_le": "2026-10-10T20:58:30+00:00",
+  "genere_le": "2026-10-10T21:43:10+00:00",
   "source": "https://github.com/Memnius-PEE",
   "projets": [
     {
@@ -61,8 +61,8 @@
         "chemin": "Memnius-PEE/optique-ondulatoire",
         "url": "https://github.com/Memnius-PEE/optique-ondulatoire",
         "branche": "main",
-        "dernier_commit": "ae9102a74e36c6dbff0f045e78afbb662e451754",
-        "derniere_activite": "2026-10-10T20:52:15Z",
+        "dernier_commit": "0cc2c78a767d35bfd693ad7555dae73240b86234",
+        "derniere_activite": "2026-10-10T21:42:23Z",
         "archive_forge": false,
         "etoiles": 0,
         "tickets_ouverts": 0,
@@ -78,7 +78,7 @@
         "projet": "optique-ondulatoire",
         "titre": "Optique ondulatoire",
         "comptes": {
-          "decision": 3,
+          "decision": 4,
           "code": 1,
           "donnees": 0,
           "sources": 2
@@ -87,11 +87,11 @@
           {
             "type": "decision",
             "id": "decisions/0001",
-            "fichier": "decisions/0001-adopter-le-socle.md",
+            "fichier": "registre/decisions/0001-adopter-le-socle.md",
             "titre": "0001 — Adopter le socle commun Memnius v1",
             "resume": "Le sujet suit les règles C1–C10 et les gardes A1–A6 du socle v1, au niveau `recommande` : des agents y écrivent régulièrement, donc R1–R8 s'appliquent aussi.",
             "ou": [
-              "decisions/0001-adopter-le-socle.md"
+              "registre/decisions/0001-adopter-le-socle.md"
             ],
             "auteurs": [
               "Pwouette"
@@ -100,16 +100,16 @@
             "origine": [
               "humain"
             ],
-            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/decisions/0001-adopter-le-socle.md"
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0001-adopter-le-socle.md"
           },
           {
             "type": "decision",
             "id": "decisions/0002",
-            "fichier": "decisions/0002-calculs-sans-dependance.md",
+            "fichier": "registre/decisions/0002-calculs-sans-dependance.md",
             "titre": "0002 — Calculs en Python sans dépendance",
             "resume": "Les scripts de `travaux/` n'utilisent que la bibliothèque standard tant qu'aucun tracé n'est nécessaire.",
             "ou": [
-              "decisions/0002-calculs-sans-dependance.md"
+              "registre/decisions/0002-calculs-sans-dependance.md"
             ],
             "auteurs": [
               "Pwouette"
@@ -118,16 +118,16 @@
             "origine": [
               "choix"
             ],
-            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/decisions/0002-calculs-sans-dependance.md"
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0002-calculs-sans-dependance.md"
           },
           {
             "type": "decision",
             "id": "decisions/0003",
-            "fichier": "decisions/0003-passer-au-socle-v2.md",
+            "fichier": "registre/decisions/0003-passer-au-socle-v2.md",
             "titre": "0003 — Passer au socle v2 et tenir le registre du projet",
             "resume": "Le projet suit désormais le socle v2 (règles C1–C11, gardes A1–A7). Chaque script, jeu de données ou source notable a sa carte dans `registre/`, et l'index `registre/INDEX.md` est régénéré à chaque changement.",
             "ou": [
-              "decisions/0003-passer-au-socle-v2.md"
+              "registre/decisions/0003-passer-au-socle-v2.md"
             ],
             "auteurs": [
               "Pwouette"
@@ -137,7 +137,25 @@
               "humain"
             ],
             "remplace": "0001",
-            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/decisions/0003-passer-au-socle-v2.md"
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0003-passer-au-socle-v2.md"
+          },
+          {
+            "type": "decision",
+            "id": "decisions/0004",
+            "fichier": "registre/decisions/0004-decisions-dans-le-registre.md",
+            "titre": "0004 — Ranger le journal des décisions dans le registre",
+            "resume": "Le journal passe de `decisions/` à `registre/decisions/`, avec son historique : tout ce qui décrit le projet est dans `registre/`. Les entrées 0001 à 0003 sont déplacées telles quelles ; les chemins `decisions/` qu'elles citent désignent désormais `registre/decisions/`.",
+            "ou": [
+              "registre/decisions/0004-decisions-dans-le-registre.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-10-10",
+            "origine": [
+              "humain"
+            ],
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0004-decisions-dans-le-registre.md"
           },
           {
             "type": "code",
