@@ -1,8 +1,13 @@
 # Workflow réutilisable : gardes du socle, appelées par chaque projet
+#   on: [pull_request, push sur main, workflow_dispatch]
+#   permissions: {contents: write, actions: write}
 #   jobs:
 #     gardes:
 #       uses: Memnius-PEE/registre/.github/workflows/gardes.yml@v2
 # Bloque la fusion si le socle n'est pas respecté (le ruleset du projet exige ce contrôle, garde A1).
+# Sur une pull request du dépôt lui-même, écrit aussi l'index du registre (règle C11) : il le commite sur la
+# branche de la pull request puis relance ce workflow (workflow_dispatch), car un commit poussé avec le
+# jeton du workflow ne déclenche pas de nouvelle exécution et le contrôle requis manquerait sur ce commit.
 name: Gardes Memnius
 on:
   workflow_call:
@@ -23,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # A4 compare le journal au commit de base
-          lfs: false       # A6 mesure les pointeurs LFS, pas les fichiers
+          lfs: false       # A6 lit la taille réelle dans les pointeurs LFS
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -33,7 +38,50 @@ jobs:
       - name: Gardes
         env:
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: python3 /tmp/registre-commun/outils/gardes.py --base "$BASE" .
+          PRINCIPALE: ${{ github.event.repository.default_branch }}
+        run: |
+          # Relance après le commit de l'index : pas de base dans l'événement, on prend le point de départ de la branche.
+          if [ -z "$BASE" ]; then BASE=$(git merge-base "origin/$PRINCIPALE" HEAD); fi
+          python3 /tmp/registre-commun/outils/gardes.py --base "$BASE" .
+
+  index:
+    name: Index du registre (C11)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # pousser le commit de l'index sur la branche de la pull request
+      actions: write    # relancer le workflow sur ce commit
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet pyyaml jsonschema
+      - name: Outils communs
+        run: git clone --quiet --depth 1 --branch "${{ inputs.socle }}" "https://github.com/${{ github.repository_owner }}/registre.git" /tmp/registre-commun
+      - name: Régénérer l'index et les blocs de liens
+        run: python3 /tmp/registre-commun/outils/memnius.py index .
+      - name: Commiter sur la pull request et relancer les gardes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCHE: ${{ github.event.pull_request.head.ref }}
+          SOURCE: ${{ github.event.pull_request.head.repo.full_name }}
+          FLUX: ${{ github.workflow }}
+        run: |
+          git add -A registre
+          if git diff --cached --quiet; then echo "index déjà à jour"; exit 0; fi
+          if [ "$SOURCE" != "${{ github.repository }}" ]; then
+            echo "::warning::pull request venant d'une copie : index non commité, la prochaine pull request du dépôt le mettra à jour"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --quiet -m "Index du registre régénéré par la CI (règle C11)"
+          git push --quiet origin "HEAD:$BRANCHE"
+          gh workflow run "$FLUX" --repo "${{ github.repository }}" --ref "$BRANCHE"
 
   secrets:
     name: A2, second filet (gitleaks)

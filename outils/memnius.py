@@ -8,6 +8,7 @@ Usage :
       Régénère registre/INDEX.md et registre/index.json à partir des cartes et du journal
       registre/decisions/, et met à jour dans chaque carte le bloc de liens cliquables vers ce qu'elle cite.
       Avec --verifier, n'écrit rien et sort en erreur si l'index ou un bloc de liens n'est pas à jour.
+      En CI, le workflow des gardes le lance sur chaque pull request et commite le résultat (règle C11).
   python3 memnius.py init [DOSSIER] [--id ID] [--titre T] [--mainteneur LOGIN]
       Ajoute à un dépôt de projet les fichiers que le socle exige (modeles/projet/), sans rien remplacer.
   python3 memnius.py carte TYPE NOM [--dossier D] [--titre T] [--ou CHEMIN]… [--auteur LOGIN]…
@@ -44,8 +45,8 @@ SCHEMA_CARTE = ICI / "schema" / "carte.schema.json"
 VOCABULAIRE = ICI / "vocabulaire.yaml"
 MODELES = ICI / "modeles"
 
-# Garde A3 du socle : README, AGENTS.md, memnius.yaml, PASSATION.md et un journal registre/decisions/ non vide.
-FICHIERS_OBLIGATOIRES = ["README.md", "AGENTS.md", "memnius.yaml", "PASSATION.md"]
+# Garde A3 du socle : README, AGENTS.md, memnius.yaml et un journal registre/decisions/ non vide.
+FICHIERS_OBLIGATOIRES = ["README.md", "AGENTS.md", "memnius.yaml"]
 FICHIERS_RECOMMANDES = ["CONTRIBUTING.md", ".github/workflows/memnius.yml"]
 JOURNAL = "registre/decisions"
 ENTREE_JOURNAL = re.compile(r"^registre/decisions/(\d{4})(-[a-z0-9]+(?:-[a-z0-9]+)*)?\.md$")
@@ -57,7 +58,8 @@ JOURS_AVANT_DORMANT = 180
 REGISTRE = "registre"
 TYPES = {"decision": "Décisions", "code": "Code", "donnees": "Données", "sources": "Sources"}
 TYPES_RANGES = ["code", "donnees", "sources"]  # les décisions sont les entrées de registre/decisions/
-FICHIERS_REGISTRE = ["registre/README.md", "registre/INDEX.md", "registre/index.json"]
+FICHIERS_REGISTRE = ["registre/README.md"]
+FICHIERS_INDEX = ["registre/INDEX.md", "registre/index.json"]  # écrits par la CI (C11), non contrôlés par A7
 NOM_CARTE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 A_REMPLIR = "À_REMPLIR"
 CHAMPS_PAR_TYPE = {"langage": "code", "commande": "code", "format": "donnees", "taille": "donnees",
@@ -465,7 +467,7 @@ def verifier_registre(dossier, fichiers=None):
             erreurs.append(f"dossier du registre absent : {REGISTRE}/{t}/ (garder un .gitkeep s'il est vide)")
     for f in fichiers:
         parties = PurePosixPath(f).parts
-        if parties[0] != REGISTRE or f in FICHIERS_REGISTRE or f.startswith(JOURNAL + "/"):
+        if parties[0] != REGISTRE or f in FICHIERS_REGISTRE + FICHIERS_INDEX or f.startswith(JOURNAL + "/"):
             continue  # le journal est contrôlé par la garde A4
         if len(parties) != 3 or parties[1] not in TYPES_RANGES:
             erreurs.append(f"{f} : hors de la structure commune (registre/decisions/, registre/code/, "
@@ -506,10 +508,6 @@ def verifier_registre(dossier, fichiers=None):
             if lien not in connues:
                 erreurs.append(f"{f} : lien vers une carte inconnue : {lien}")
 
-    perimes = index_a_jour(dossier, fichiers)
-    if perimes:
-        erreurs.append(f"index ou liens des cartes pas à jour ({', '.join(perimes)}) : lancer « python3 memnius.py index »")
-
     orphelins = [f for f in fichiers if A_COUVRIR.match(f) and not HORS_COUVERTURE.search(f)
                  and not any(f == c or f.startswith(c + "/") for c in couverts)]
     if orphelins:
@@ -549,7 +547,7 @@ def nouvelle_carte(args):
     texte = remplir((MODELES / "cartes" / f"{args.type}.md").read_text(encoding="utf-8"), valeurs)
     chemin.parent.mkdir(parents=True, exist_ok=True)
     chemin.write_text(texte, encoding="utf-8")
-    print(f"créée : {chemin} (remplacer les « {A_REMPLIR} », puis lancer « python3 memnius.py index »)")
+    print(f"créée : {chemin} (remplacer les « {A_REMPLIR} » ; la CI régénère l'index sur la pull request)")
     return 0
 
 
@@ -805,7 +803,8 @@ def ecrire_registre_md(registre, chemin):
         else:
             comptes = ["—"] * len(TYPES)
         socle = f.get("socle") or {}
-        socle = f"{socle.get('version', '?')} {socle.get('niveau', '')}".strip() if socle else ""
+        options = ", ".join(socle.get("options") or []) if socle else ""
+        socle = f"{socle.get('version', '?')}" + (f" ({options})" if options else "") if socle else ""
         activite = (p["depot"].get("derniere_activite") or "")[:10]
         lignes.append("| " + " | ".join([lien, f.get("statut", "?"), domaines, mainteneurs, *comptes, socle, activite,
                                           icones[p["conformite"]["niveau"]]]) + " |")
@@ -863,6 +862,11 @@ def construire_registre(args):
     if args.local:
         racine = Path(args.local)
         projets = [entree_locale(d, vocab) for d in sorted(racine.iterdir()) if d.is_dir() and not d.name.startswith(".")]
+        for p in projets:  # comme en mode GitHub : sans index (écrit par la CI, C11), le projet n'est pas lisible
+            if p["index"] is None or p["index"].get("schema") != "memnius-index/1":
+                p["index"] = None
+                p["conformite"]["erreurs"].append("A7 : registre du projet absent ou illisible (registre/index.json)")
+                p["conformite"]["niveau"] = niveau(p["conformite"]["erreurs"], p["conformite"]["avertissements"])
         source = str(racine)
     else:
         gh = GitHub(os.environ.get("GITHUB_TOKEN", ""), os.environ.get("GITHUB_API_URL", "https://api.github.com"))

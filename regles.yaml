@@ -8,20 +8,20 @@ regles:
   C3: {titre: Les règles appartiennent aux mainteneurs, niveau: socle}
   C4: {titre: Origine marquée, niveau: socle}
   C5: {titre: Source ou « non vérifié », niveau: socle}
-  C6: {titre: Second regard, niveau: socle}
+  C6: {titre: Second regard, niveau: socle, abrogee: true, abrogee_par: '0017'}
   C7: {titre: Rien ne sort sans accord, niveau: socle}
-  C8: {titre: Dans le doute, on demande, niveau: socle}
-  C9: {titre: Passation en fin de session, niveau: socle}
+  C8: {titre: Dans le doute, on demande, niveau: socle, abrogee: true, abrogee_par: '0017'}
+  C9: {titre: Passation en fin de session, niveau: socle, abrogee: true, abrogee_par: '0017'}
   C10: {titre: Langue de l'interlocuteur, niveau: socle}
   C11: {titre: Registre du projet tenu à jour, niveau: socle, depuis: v2}
-  R1: {titre: Se présenter avant d'agir, niveau: recommande}
-  R2: {titre: Brouillons à part, niveau: recommande}
-  R3: {titre: Délégation tracée, niveau: recommande}
-  R4: {titre: Annoncer les grands essaims, niveau: recommande}
-  R5: {titre: Trois allers-retours, puis escalade, niveau: recommande}
-  R6: {titre: Copier, jamais paraphraser, niveau: recommande}
-  R7: {titre: Test des deux mondes, niveau: recommande}
-  R8: {titre: Échecs consignés, niveau: recommande}
+  R1: {titre: Se présenter avant d'agir, niveau: recommande, abrogee: true, abrogee_par: '0017'}
+  R2: {titre: Brouillons à part, niveau: recommande, abrogee: true, abrogee_par: '0017'}
+  R3: {titre: Délégation tracée, niveau: recommande, abrogee: true, abrogee_par: '0017'}
+  R4: {titre: Annoncer les grands essaims, niveau: recommande, abrogee: true, abrogee_par: '0017'}
+  R5: {titre: Trois allers-retours, puis escalade, niveau: recommande, abrogee: true, abrogee_par: '0017'}
+  R6: {titre: Copier, jamais paraphraser, niveau: recommande, abrogee: true, abrogee_par: '0017'}
+  R7: {titre: Test des deux mondes, niveau: recommande, abrogee: true, abrogee_par: '0017'}
+  R8: {titre: Échecs consignés, niveau: recommande, abrogee: true, abrogee_par: '0017'}
   O1: {titre: Dépôt de quarantaine séparé, niveau: option}
   O2: {titre: Empreintes des gardes, niveau: option}
   O3: {titre: Contrôles de sabotage, niveau: option}
@@ -36,5 +36,5 @@ gardes:
   A3: {titre: Structure, ou: CI}
   A4: {titre: Journal en ajout seul, ou: CI}
   A5: {titre: Renvois aux règles, ou: CI}
-  A6: {titre: Gros fichiers, ou: CI et pre-commit, seuil_octets: 10000000}
-  A7: {titre: Registre du projet, ou: CI, depuis: v2}
+  A6: {titre: Gros fichiers, ou: CI et pre-commit, seuil_octets: 10000000, lfs_accepte: false}
+  A7: {titre: Registre du projet, ou: CI (l'index est écrit par la CI sur la pull request), depuis: v2}

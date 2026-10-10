@@ -7,16 +7,10 @@
     "id",
     "titre",
     "resume",
-    "statut",
-    "nature",
-    "domaines",
     "langue",
     "mainteneurs",
-    "agents",
     "socle",
-    "licence",
-    "visibilite",
-    "cree_le"
+    "visibilite"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -197,22 +191,14 @@
     "socle": {
       "type": "object",
       "required": [
-        "version",
-        "niveau"
+        "version"
       ],
       "additionalProperties": false,
-      "description": "Version du socle commun suivie et niveau adopté (REGLES.md du dépôt registre de l'organisation)",
+      "description": "Version du socle commun suivie et options adoptées (REGLES.md du dépôt registre de l'organisation)",
       "properties": {
         "version": {
           "type": "string",
           "pattern": "^v[0-9]+$"
-        },
-        "niveau": {
-          "enum": [
-            "socle",
-            "recommande",
-            "renforce"
-          ]
         },
         "options": {
           "type": "array",

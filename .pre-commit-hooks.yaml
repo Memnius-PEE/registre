@@ -6,7 +6,7 @@
   pass_filenames: false
   always_run: true
 - id: memnius-index
-  name: Index du registre du projet (garde A7, demande PyYAML)
+  name: Index du registre du projet (facultatif, la CI le fait aussi ; demande PyYAML)
   entry: outils/memnius.py index
   language: script
   pass_filenames: false
