@@ -1,0 +1,208 @@
+{
+  "schema": "memnius-registre/2",
+  "genere_le": "2026-10-10T20:53:08+00:00",
+  "source": "https://github.com/Memnius-PEE",
+  "projets": [
+    {
+      "id": "optique-ondulatoire",
+      "fiche": {
+        "schema": "memnius/2",
+        "id": "optique-ondulatoire",
+        "titre": "Optique ondulatoire",
+        "resume": "Étudier interférences et diffraction de la lumière, des fentes d'Young aux réseaux, avec des calculs simples et des manipulations faisables à la maison.",
+        "statut": "actif",
+        "nature": "etude",
+        "domaines": [
+          "physique"
+        ],
+        "mots_cles": [
+          "interferences",
+          "diffraction",
+          "fentes-young",
+          "reseaux"
+        ],
+        "langue": "fr",
+        "mainteneurs": [
+          {
+            "github": "Pwouette",
+            "nom": "Romain"
+          }
+        ],
+        "contribution": {
+          "ouverte": true,
+          "niveau_entree": "facile"
+        },
+        "outils": [
+          "python",
+          "markdown"
+        ],
+        "agents": {
+          "politique": "relecture-humaine"
+        },
+        "liens": {
+          "projets": [],
+          "externes": [
+            {
+              "titre": "Cours d'optique ondulatoire (Wikiversité)",
+              "url": "https://fr.wikiversity.org/wiki/Optique_ondulatoire"
+            }
+          ]
+        },
+        "socle": {
+          "version": "v2",
+          "niveau": "recommande",
+          "options": []
+        },
+        "licence": "CC-BY-4.0",
+        "visibilite": "public",
+        "cree_le": "2026-09-26"
+      },
+      "depot": {
+        "chemin": "Memnius-PEE/optique-ondulatoire",
+        "url": "https://github.com/Memnius-PEE/optique-ondulatoire",
+        "branche": "main",
+        "dernier_commit": "ae9102a74e36c6dbff0f045e78afbb662e451754",
+        "derniere_activite": "2026-10-10T20:52:15Z",
+        "archive_forge": false,
+        "etoiles": 0,
+        "tickets_ouverts": 0,
+        "branche_protegee": true
+      },
+      "conformite": {
+        "niveau": "conforme",
+        "erreurs": [],
+        "avertissements": []
+      },
+      "index": {
+        "schema": "memnius-index/1",
+        "projet": "optique-ondulatoire",
+        "titre": "Optique ondulatoire",
+        "comptes": {
+          "decision": 3,
+          "code": 1,
+          "donnees": 0,
+          "sources": 2
+        },
+        "cartes": [
+          {
+            "type": "decision",
+            "id": "decisions/0001",
+            "fichier": "decisions/0001-adopter-le-socle.md",
+            "titre": "0001 — Adopter le socle commun Memnius v1",
+            "resume": "Le sujet suit les règles C1–C10 et les gardes A1–A6 du socle v1, au niveau `recommande` : des agents y écrivent régulièrement, donc R1–R8 s'appliquent aussi.",
+            "ou": [
+              "decisions/0001-adopter-le-socle.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-09-26",
+            "origine": [
+              "humain"
+            ],
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/decisions/0001-adopter-le-socle.md"
+          },
+          {
+            "type": "decision",
+            "id": "decisions/0002",
+            "fichier": "decisions/0002-calculs-sans-dependance.md",
+            "titre": "0002 — Calculs en Python sans dépendance",
+            "resume": "Les scripts de `travaux/` n'utilisent que la bibliothèque standard tant qu'aucun tracé n'est nécessaire.",
+            "ou": [
+              "decisions/0002-calculs-sans-dependance.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-09-26",
+            "origine": [
+              "choix"
+            ],
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/decisions/0002-calculs-sans-dependance.md"
+          },
+          {
+            "type": "decision",
+            "id": "decisions/0003",
+            "fichier": "decisions/0003-passer-au-socle-v2.md",
+            "titre": "0003 — Passer au socle v2 et tenir le registre du projet",
+            "resume": "Le projet suit désormais le socle v2 (règles C1–C11, gardes A1–A7). Chaque script, jeu de données ou source notable a sa carte dans `registre/`, et l'index `registre/INDEX.md` est régénéré à chaque changement.",
+            "ou": [
+              "decisions/0003-passer-au-socle-v2.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-10-10",
+            "origine": [
+              "humain"
+            ],
+            "remplace": "0001",
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/decisions/0003-passer-au-socle-v2.md"
+          },
+          {
+            "type": "code",
+            "id": "code/interfrange",
+            "fichier": "registre/code/interfrange.md",
+            "titre": "Calcul de l'interfrange des fentes d'Young",
+            "resume": "Calcule l'interfrange i = λD/a des fentes d'Young et affiche l'ordre de grandeur pour un pointeur laser rouge.",
+            "ou": [
+              "travaux/interfrange.py"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "commande": "python3 travaux/interfrange.py",
+            "date": "2026-09-26",
+            "langage": "python",
+            "liens": [
+              "sources/hecht-optics",
+              "decisions/0002"
+            ],
+            "mots_cles": [
+              "interferences",
+              "fentes-young"
+            ],
+            "statut": "a-relire",
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md"
+          },
+          {
+            "type": "sources",
+            "id": "sources/hecht-optics",
+            "fichier": "registre/sources/hecht-optics.md",
+            "titre": "Hecht, Optics (5e édition)",
+            "resume": "Manuel de référence pour l'optique ondulatoire ; le chapitre 9 traite des interférences et des fentes d'Young.",
+            "ou": [
+              "sources/references.bib"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "cle_bib": "hecht2017",
+            "date": "2026-09-26",
+            "reference": "Hecht, Eugene. Optics, 5e édition, Pearson, 2017.",
+            "statut": "a-relire",
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/hecht-optics.md"
+          },
+          {
+            "type": "sources",
+            "id": "sources/wikiversite-optique",
+            "fichier": "registre/sources/wikiversite-optique.md",
+            "titre": "Cours d'optique ondulatoire (Wikiversité)",
+            "resume": "Cours d'introduction en ligne, libre, utile pour les contributeur·ices qui découvrent le sujet.",
+            "ou": [
+              "sources/liens.md",
+              "https://fr.wikiversity.org/wiki/Optique_ondulatoire"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-09-26",
+            "licence": "CC-BY-SA",
+            "statut": "a-relire",
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/wikiversite-optique.md"
+          }
+        ]
+      }
+    }
+  ]
+}
