@@ -78,7 +78,7 @@ class DepotDeTest(unittest.TestCase):
             "PASSATION.md": "# Passation\n\n## 5. Ce qui reste dû ou en cours *\n- rien\n",
             ".github/workflows/memnius.yml": "name: Memnius\n",
             "memnius.yaml": FICHE.format(id="sujet-test"),
-            "decisions/0001-adopter-le-socle.md": ENTREE.format(n="0001"),
+            "registre/decisions/0001-adopter-le-socle.md": ENTREE.format(n="0001"),
             "notes/idee.md": "Une note ordinaire qui parle de C99 sans être un fichier de gouvernance.\n",
             "travaux/calcul.py": "print(42)\n",
             "registre/README.md": "# Registre\n\nVoir la règle C11 et la garde A7.\n",
@@ -167,6 +167,10 @@ class A3Structure(DepotDeTest):
         self.ecrire("memnius.yaml", fiche)
         self.assertSonne("A3", "socle")
 
+    def test_journal_a_l_ancienne_place(self):
+        sh(self.d, "git", "mv", "registre/decisions", "decisions")
+        self.assertSonne("A3", "git mv decisions registre/decisions")
+
     def test_fiche_v1_refusee(self):
         self.ecrire("memnius.yaml", FICHE.format(id="sujet-test").replace("memnius/2", "memnius/1"))
         self.assertSonne("A3", "memnius/2")
@@ -174,36 +178,46 @@ class A3Structure(DepotDeTest):
 
 class A4Journal(DepotDeTest):
     def test_sain_avec_nouvelle_entree(self):
-        self.ecrire("decisions/0002.md", ENTREE.format(n="0002"))
+        self.ecrire("registre/decisions/0002.md", ENTREE.format(n="0002"))
         self.assertVerte("A4", "--base", self.base)
 
     def test_entree_publiee_modifiee(self):
-        self.ecrire("decisions/0001-adopter-le-socle.md", ENTREE.format(n="0001") + "Ajout après coup.\n")
+        self.ecrire("registre/decisions/0001-adopter-le-socle.md", ENTREE.format(n="0001") + "Ajout après coup.\n")
         self.assertSonne("A4", "entrée publiée modifiée", "--base", self.base)
 
     def test_entree_a_remplir_puis_remplie(self):
         # Entrée créée à partir du modèle, remplie par la pull request suivante.
-        self.ecrire("decisions/0001-adopter-le-socle.md", ENTREE.format(n="0001").replace("2026-09-26", "AAAA-MM-JJ"))
+        self.ecrire("registre/decisions/0001-adopter-le-socle.md", ENTREE.format(n="0001").replace("2026-09-26", "AAAA-MM-JJ"))
         base = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.d, capture_output=True, text=True).stdout.strip()
-        self.ecrire("decisions/0001-adopter-le-socle.md", ENTREE.format(n="0001"))
+        self.ecrire("registre/decisions/0001-adopter-le-socle.md", ENTREE.format(n="0001"))
         self.assertVerte("A4", "--base", base)
 
     def test_entree_publiee_supprimee(self):
-        (self.d / "decisions/0001-adopter-le-socle.md").unlink()
-        self.ecrire("decisions/0002.md", ENTREE.format(n="0002"))
+        (self.d / "registre/decisions/0001-adopter-le-socle.md").unlink()
+        self.ecrire("registre/decisions/0002.md", ENTREE.format(n="0002"))
         self.assertSonne("A4", "entrée publiée", "--base", self.base)  # vue par Git comme supprimée ou renommée
 
     def test_sans_marqueur_origine(self):
-        self.ecrire("decisions/0002.md", ENTREE.format(n="0002").replace("[humain] ", ""))
+        self.ecrire("registre/decisions/0002.md", ENTREE.format(n="0002").replace("[humain] ", ""))
         self.assertSonne("A4", "[humain], [choix] ou [agent]")
 
     def test_nom_non_conforme(self):
-        self.ecrire("decisions/choix-du-format.md", ENTREE.format(n="0002"))
+        self.ecrire("registre/decisions/choix-du-format.md", ENTREE.format(n="0002"))
         self.assertSonne("A4", "nom attendu")
 
     def test_valeurs_du_modele(self):
-        self.ecrire("decisions/0002.md", ENTREE.format(n="0002").replace("2026-09-26", "AAAA-MM-JJ"))
+        self.ecrire("registre/decisions/0002.md", ENTREE.format(n="0002").replace("2026-09-26", "AAAA-MM-JJ"))
         self.assertSonne("A4", "valeurs du modèle")
+
+    def test_journal_deplace_dans_le_registre(self):
+        # Projet qui tenait son journal à la racine (avant la décision 0016 du socle) et le déplace.
+        sh(self.d, "git", "mv", "registre/decisions", "decisions")
+        sh(self.d, "git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "ancien emplacement")
+        base = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.d, capture_output=True, text=True).stdout.strip()
+        self.assertSonne("A4", "le journal vit dans registre/decisions/")
+        sh(self.d, "git", "mv", "decisions", "registre/decisions")
+        sh(self.d, "git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "journal dans le registre")
+        self.assertVerte("A4", "--base", base)
 
     def test_base_introuvable_compte_comme_echec(self):
         self.assertSonne("A4", "n'a pas pu tourner", "--base", "f" * 40)
@@ -268,7 +282,16 @@ class A7Registre(DepotDeTest):
 
     def test_index_perime(self):
         self.ecrire("registre/code/autre.md", CARTE)
-        self.assertSonne("A7", "index absent ou pas à jour")
+        self.assertSonne("A7", "index ou liens des cartes pas à jour")
+
+    def test_bloc_de_liens_edite_a_la_main(self):
+        carte = self.d / "registre/code/calcul.md"
+        self.ecrire("registre/code/calcul.md", carte.read_text(encoding="utf-8").replace("../../travaux/calcul.py", "ailleurs.py"))
+        self.assertSonne("A7", "registre/code/calcul.md")
+
+    def test_bloc_de_liens_retire(self):
+        self.ecrire("registre/code/calcul.md", CARTE)
+        self.assertSonne("A7", "registre/code/calcul.md")
 
     def test_index_edite_a_la_main(self):
         self.ecrire("registre/INDEX.md", "# Index retouché\n")

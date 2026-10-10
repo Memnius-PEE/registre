@@ -5,21 +5,23 @@ Usage :
   python3 memnius.py verifier [DOSSIER]
       Contrôle un dépôt de projet : structure (garde A3) et registre (garde A7).
   python3 memnius.py index [DOSSIER] [--verifier]
-      Régénère registre/INDEX.md et registre/index.json à partir des cartes et du journal decisions/.
-      Avec --verifier, n'écrit rien et sort en erreur si l'index n'est pas à jour.
+      Régénère registre/INDEX.md et registre/index.json à partir des cartes et du journal
+      registre/decisions/, et met à jour dans chaque carte le bloc de liens cliquables vers ce qu'elle cite.
+      Avec --verifier, n'écrit rien et sort en erreur si l'index ou un bloc de liens n'est pas à jour.
   python3 memnius.py init [DOSSIER] [--id ID] [--titre T] [--mainteneur LOGIN]
       Ajoute à un dépôt de projet les fichiers que le socle exige (modeles/projet/), sans rien remplacer.
   python3 memnius.py carte TYPE NOM [--dossier D] [--titre T] [--ou CHEMIN]… [--auteur LOGIN]…
       Crée une carte à remplir à partir de son modèle (modeles/cartes/) : registre/TYPE/NOM.md pour
-      code, donnees ou sources ; decisions/NNNN-NOM.md (numéro suivant) pour une décision.
+      code, donnees ou sources ; registre/decisions/NNNN-NOM.md (numéro suivant) pour une décision.
   python3 memnius.py registre --github ORG [--github AUTRE] [--sortie DIR]
   python3 memnius.py registre --local DOSSIER-DES-CLONES [--sortie DIR]
       Construit le super-registre : REGISTRE.md (les projets), CARTES.md (toutes les cartes, et qui a
       fait quoi) et registre.json. Un dépôt de l'organisation est un projet s'il porte le topic GitHub
       « memnius-projet ». Jeton lu dans GITHUB_TOKEN (facultatif si tous les dépôts sont publics).
 
-Les cartes de décision sont les entrées du journal decisions/ : on ne les recopie pas dans registre/.
-L'index et le super-registre sont dérivés : on ne les édite jamais à la main.
+Tout le registre vit dans registre/ : les cartes de décision sont les entrées du journal registre/decisions/,
+les autres cartes sont rangées dans registre/code/, registre/donnees/ et registre/sources/.
+L'index, les blocs de liens des cartes et le super-registre sont dérivés : on ne les édite jamais à la main.
 Dépendances : PyYAML ; jsonschema est utilisé s'il est installé (sinon contrôles essentiels seulement).
 """
 import argparse
@@ -42,17 +44,19 @@ SCHEMA_CARTE = ICI / "schema" / "carte.schema.json"
 VOCABULAIRE = ICI / "vocabulaire.yaml"
 MODELES = ICI / "modeles"
 
-# Garde A3 du socle : README, AGENTS.md, memnius.yaml, PASSATION.md et un journal decisions/ non vide.
+# Garde A3 du socle : README, AGENTS.md, memnius.yaml, PASSATION.md et un journal registre/decisions/ non vide.
 FICHIERS_OBLIGATOIRES = ["README.md", "AGENTS.md", "memnius.yaml", "PASSATION.md"]
 FICHIERS_RECOMMANDES = ["CONTRIBUTING.md", ".github/workflows/memnius.yml"]
-ENTREE_JOURNAL = re.compile(r"^decisions/(\d{4})(-[a-z0-9]+(?:-[a-z0-9]+)*)?\.md$")
+JOURNAL = "registre/decisions"
+ENTREE_JOURNAL = re.compile(r"^registre/decisions/(\d{4})(-[a-z0-9]+(?:-[a-z0-9]+)*)?\.md$")
+ANCIEN_JOURNAL = re.compile(r"^decisions/\d{4}")  # emplacement d'avant la décision 0016 du socle
 MARQUEURS_MODELE = re.compile(r"TITRE_DU_PROJET|SLUG-DU-PROJET|RÉSUMÉ_EN|IDENTIFIANT_GITHUB|AAAA-MM-JJ|DOMAINE\b")
 JOURS_AVANT_DORMANT = 180
 
 # Registre d'un projet (garde A7) : la même structure dans tous les dépôts.
 REGISTRE = "registre"
 TYPES = {"decision": "Décisions", "code": "Code", "donnees": "Données", "sources": "Sources"}
-TYPES_RANGES = ["code", "donnees", "sources"]  # les décisions restent dans decisions/
+TYPES_RANGES = ["code", "donnees", "sources"]  # les décisions sont les entrées de registre/decisions/
 FICHIERS_REGISTRE = ["registre/README.md", "registre/INDEX.md", "registre/index.json"]
 NOM_CARTE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 A_REMPLIR = "À_REMPLIR"
@@ -120,7 +124,10 @@ def controler(texte_fiche, fichiers_presents, nom_depot, vocab, derniere_activit
         if f not in fichiers_presents:
             avertissements.append(f"fichier recommandé absent : {f}")
     if not any(ENTREE_JOURNAL.match(f) for f in fichiers_presents):
-        erreurs.append("journal de décisions absent ou vide : decisions/NNNN.md")
+        if any(ANCIEN_JOURNAL.match(f) for f in fichiers_presents):
+            erreurs.append("le journal doit passer de decisions/ à registre/decisions/ : git mv decisions registre/decisions")
+        else:
+            erreurs.append("journal de décisions absent ou vide : registre/decisions/NNNN.md")
     if branche_protegee is False:
         erreurs.append("A1 : la branche principale n'est pas protégée (il faut un ruleset exigeant une pull request et bloquant le force-push)")
 
@@ -281,11 +288,70 @@ def depuis_registre(fichier):
 
 
 def lien_ou(cible, prefixe):
+    """Un emplacement cliquable : adresse web, ou chemin du dépôt relatif au fichier qui le cite (prefixe)."""
     if re.match(r"^https?://", cible):
         return f"[{urllib.parse.urlparse(cible).netloc or cible}]({cible})"
     if cible.startswith("drive:"):
         return f"`{cible}`"
-    return f"[`{cible}`]({prefixe}{cible})"
+    return f"[`{cible}`]({prefixe}{urllib.parse.quote(cible)})"
+
+
+# Bloc de liens cliquables tenu par l'outil dans chaque carte, juste sous l'en-tête : GitHub affiche
+# l'en-tête YAML en tableau, sans liens ; ce bloc rend cliquables les fichiers et cartes qu'elle cite.
+DEBUT_LIENS = "<!-- memnius:liens : bloc généré par « memnius.py index », ne pas éditer -->"
+FIN_LIENS = "<!-- /memnius:liens -->"
+BLOC_LIENS = re.compile(r"<!-- memnius:liens\b.*?<!-- /memnius:liens -->\n*", re.S)
+
+
+def en_liste(valeur):
+    if valeur is None:
+        return []
+    return [v for v in (valeur if isinstance(valeur, list) else [valeur]) if isinstance(v, str) and v and A_REMPLIR not in v]
+
+
+def bloc_liens(carte, fichiers_par_id):
+    """Le bloc de liens d'une carte rangée, ou "" si elle ne cite rien."""
+    dossier_carte = PurePosixPath(carte["fichier"]).parent
+    prefixe = "../" * len(dossier_carte.parts)
+    ou = [lien_ou(o, prefixe) for o in en_liste(carte.get("ou"))]
+    ou += [lien_ou(u, prefixe) for u in en_liste(carte.get("url"))]
+    ou += [f"[doi:{d}](https://doi.org/{d})" for d in en_liste(carte.get("doi"))]
+    ou = list(dict.fromkeys(ou))  # une adresse citée dans ou et dans url n'apparaît qu'une fois
+    liens = []
+    for lien in en_liste(carte.get("liens")):
+        cible = fichiers_par_id.get(lien)
+        liens.append(f"[{lien}]({os.path.relpath(cible, dossier_carte)})" if cible else f"`{lien}`")
+    if not ou and not liens:
+        return ""
+    lignes = [DEBUT_LIENS]
+    if ou:
+        lignes.append("- **Où :** " + " · ".join(ou))
+    if liens:
+        lignes.append("- **Liens :** " + " · ".join(liens))
+    return "\n".join(lignes + ["", FIN_LIENS])
+
+
+def avec_bloc_liens(texte, bloc):
+    """Le texte de la carte, bloc de liens remplacé (ou retiré si bloc est vide), le reste intact."""
+    texte = texte.replace("\r\n", "\n")
+    m = ENTETE.match(texte)
+    corps = BLOC_LIENS.sub("", m.group(2)).lstrip("\n")
+    morceaux = [x for x in (bloc + "\n" if bloc else "", corps) if x]
+    return texte[:m.start(2)] + "\n" + "\n".join(morceaux) if morceaux else texte[:m.start(2)]
+
+
+def cartes_perimees(dossier, cartes):
+    """{fichier : texte attendu} pour les cartes rangées dont le bloc de liens n'est pas à jour."""
+    fichiers_par_id = {c["id"]: c["fichier"] for c in cartes}
+    attendus = {}
+    for c in cartes:
+        if c["type"] == "decision":
+            continue  # entrées du journal : jamais réécrites (C2, garde A4)
+        texte = (Path(dossier) / c["fichier"]).read_text(encoding="utf-8")
+        nouveau = avec_bloc_liens(texte, bloc_liens(c, fichiers_par_id))
+        if nouveau != texte:
+            attendus[c["fichier"]] = nouveau
+    return attendus
 
 
 def personnes(cartes):
@@ -308,7 +374,7 @@ def index_markdown(index):
     lignes = [
         f"# Index du registre — {titre}",
         "",
-        "_Généré par `memnius.py index` à partir des cartes de `registre/` et du journal `decisions/`. "
+        "_Généré par `memnius.py index` à partir des cartes de `registre/` et du journal `registre/decisions/`. "
         "Ne pas éditer : modifier ou ajouter une carte, puis relancer l'outil._",
         "",
         f"{pluriel(len(cartes), 'carte')} : {pluriel(c['decision'], 'décision')}, {c['code']} code, "
@@ -333,7 +399,7 @@ def index_markdown(index):
                 f"[{cellule(x.get('titre') or x['id'])}]({depuis_registre(x['fichier'])}){etat}",
                 cellule(x.get("resume")),
                 ", ".join(qui(a) for a in x.get("auteurs") or []),
-                *([] if t == "decision" else [", ".join(lien_ou(o, "../") for o in x.get("ou") or [])]),
+                *([] if t == "decision" else [", ".join(lien_ou(o, "../") for o in en_liste(x.get("ou")))]),
                 date,
             ]) + " |")
     lignes += ["", "## Qui a fait quoi", ""]
@@ -357,6 +423,8 @@ def textes_index(index, markdown):
 
 def ecrire_index(dossier):
     index, markdown, defauts = construire_index(dossier)
+    for f, texte in cartes_perimees(dossier, index["cartes"]).items():
+        (Path(dossier) / f).write_text(texte, encoding="utf-8")
     texte_json, texte_md = textes_index(index, markdown)
     (Path(dossier) / REGISTRE).mkdir(exist_ok=True)
     (Path(dossier) / REGISTRE / "index.json").write_text(texte_json, encoding="utf-8")
@@ -365,10 +433,10 @@ def ecrire_index(dossier):
 
 
 def index_a_jour(dossier, fichiers=None):
-    """Renvoie la liste des fichiers d'index absents ou périmés."""
+    """Renvoie la liste des fichiers d'index absents ou périmés, et des cartes au bloc de liens périmé."""
     index, markdown, _ = construire_index(dossier, fichiers)
     attendus = dict(zip(("registre/index.json", "registre/INDEX.md"), textes_index(index, markdown)))
-    perimes = []
+    perimes = sorted(cartes_perimees(dossier, index["cartes"]))
     for f, texte in attendus.items():
         p = Path(dossier) / f
         if not p.exists() or p.read_text(encoding="utf-8") != texte:
@@ -397,10 +465,11 @@ def verifier_registre(dossier, fichiers=None):
             erreurs.append(f"dossier du registre absent : {REGISTRE}/{t}/ (garder un .gitkeep s'il est vide)")
     for f in fichiers:
         parties = PurePosixPath(f).parts
-        if parties[0] != REGISTRE or f in FICHIERS_REGISTRE:
-            continue
+        if parties[0] != REGISTRE or f in FICHIERS_REGISTRE or f.startswith(JOURNAL + "/"):
+            continue  # le journal est contrôlé par la garde A4
         if len(parties) != 3 or parties[1] not in TYPES_RANGES:
-            erreurs.append(f"{f} : hors de la structure commune (registre/code/, registre/donnees/, registre/sources/)")
+            erreurs.append(f"{f} : hors de la structure commune (registre/decisions/, registre/code/, "
+                           "registre/donnees/, registre/sources/)")
         elif parties[2] != ".gitkeep" and not (parties[2].endswith(".md") and NOM_CARTE.match(parties[2][:-3])):
             erreurs.append(f"{f} : nom attendu registre/{parties[1]}/nom-en-minuscules.md")
 
@@ -439,7 +508,7 @@ def verifier_registre(dossier, fichiers=None):
 
     perimes = index_a_jour(dossier, fichiers)
     if perimes:
-        erreurs.append(f"index absent ou pas à jour ({', '.join(perimes)}) : lancer « python3 memnius.py index »")
+        erreurs.append(f"index ou liens des cartes pas à jour ({', '.join(perimes)}) : lancer « python3 memnius.py index »")
 
     orphelins = [f for f in fichiers if A_COUVRIR.match(f) and not HORS_COUVERTURE.search(f)
                  and not any(f == c or f.startswith(c + "/") for c in couverts)]
@@ -471,7 +540,7 @@ def nouvelle_carte(args):
         pris = [int(m.group(1)) for f in lister_fichiers(dossier) if (m := ENTREE_JOURNAL.match(f))]
         valeurs["numero"] = f"{max(pris, default=0) + 1:04d}"
         valeurs["auteurs"] = ", ".join("@" + a.lstrip("@") for a in args.auteur) or A_REMPLIR
-        chemin = dossier / "decisions" / f"{valeurs['numero']}-{args.nom}.md"
+        chemin = dossier / JOURNAL / f"{valeurs['numero']}-{args.nom}.md"
     else:
         chemin = dossier / REGISTRE / args.type / f"{args.nom}.md"
     if chemin.exists():
@@ -494,7 +563,7 @@ def init(args):
     ajoutes = []
     for source in sorted(p for p in modele.rglob("*") if p.is_file()):
         rel = source.relative_to(modele).as_posix()
-        if rel.startswith("decisions/") and journal:
+        if rel.startswith(JOURNAL + "/") and journal:
             continue  # le projet tient déjà un journal : on ne lui impose pas d'entrée 0001
         cible = dossier / rel
         if cible.exists():
@@ -763,10 +832,17 @@ def ecrire_cartes_md(registre, chemin):
         if not du_type:
             lignes.append("_Aucune carte._")
             continue
-        lignes += ["| Projet | Carte | Résumé | Qui |", "|---|---|---|---|"]
+        if t == "decision":
+            lignes += ["| Projet | Carte | Résumé | Qui |", "|---|---|---|---|"]
+        else:
+            lignes += ["| Projet | Carte | Résumé | Qui | Où |", "|---|---|---|---|---|"]
         for p, c in du_type:
-            lignes.append(f"| {p['id']} | [{cellule(c.get('titre') or c['id'])}]({c['url']}) | {cellule(c.get('resume'))} | "
-                          + ", ".join(qui(a) for a in c.get("auteurs") or []) + " |")
+            ou = [] if t == "decision" else [", ".join(
+                lien_ou(o, "") if re.match(r"^(https?://|drive:)", o) else f"[`{o}`]({url_fichier(p, o.rstrip('/'))})"
+                for o in en_liste(c.get("ou")))]
+            lignes.append("| " + " | ".join([p["id"], f"[{cellule(c.get('titre') or c['id'])}]({c['url']})",
+                                             cellule(c.get("resume")), ", ".join(qui(a) for a in c.get("auteurs") or []),
+                                             *ou]) + " |")
     lignes += ["", "## Qui a fait quoi", "", "| Personne | Projet | Décisions | Code | Données | Sources |", "|---|---|---|---|---|---|"]
     par_personne = {}
     for p, c in toutes:

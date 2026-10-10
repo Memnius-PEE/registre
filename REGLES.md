@@ -30,7 +30,7 @@ de ce dépôt est testée dans les deux sens (`tests/`), elle doit refuser un ca
 | Règle | Énoncé |
 |---|---|
 | **C1 Histoire en ajout seul** | Sur la branche principale, on ne réécrit jamais l'histoire : ni force-push, ni rebase, ni amend d'un commit publié. Une erreur se corrige par un nouveau commit. |
-| **C2 Décision écrite** | Toute décision qui engage le dépôt (méthode, périmètre, choix d'outil, règle) est une entrée datée du journal `decisions/`. Une entrée publiée n'est jamais modifiée ; on la corrige par une nouvelle entrée. |
+| **C2 Décision écrite** | Toute décision qui engage le dépôt (méthode, périmètre, choix d'outil, règle) est une entrée datée du journal `registre/decisions/`. Une entrée publiée n'est jamais modifiée ; on la corrige par une nouvelle entrée. |
 | **C3 Les règles appartiennent aux mainteneurs** | Seuls les mainteneurs déclarés créent, modifient ou suppriment une règle : un comité de deux ou trois personnes pour le socle, et pour chaque dépôt un mainteneur nommé par ce comité. Les agents et les autres contributeurs proposent, par une demande de fusion. |
 | **C4 Origine marquée** | Chaque entrée du journal dit qui parle : `[humain]` pour les mots tapés par une personne, `[choix]` pour une option rédigée par un agent et choisie par une personne, `[agent]` pour une déduction d'agent. Un commit fait avec un agent le déclare par la ligne `Assisted-by: <outil> (<modèle>)`. |
 | **C5 Source ou « non vérifié »** | Tout chiffre ou fait affirmé dans un document porte sa source (fichier, commande et ce qu'elle a rendu, référence) ou la mention `[non vérifié]`. |
@@ -51,11 +51,11 @@ qui n'a pas pu tourner compte comme un échec, jamais comme un succès.
 |---|---|---|---|
 | **A1 Branche protégée** | Pas de force-push ni de push direct sur `main` ; fusion par pull request relue, gardes vertes | Ruleset GitHub sur `main`, contrôlé chaque nuit par le super-registre | C1, C6 |
 | **A2 Secrets** | Aucune clé, mot de passe ou jeton dans les fichiers suivis | `gardes.py` (CI et pre-commit), gitleaks (CI), protection des pushs de GitHub | C7 |
-| **A3 Structure** | README.md, AGENTS.md, `memnius.yaml` valide, `decisions/` et `PASSATION.md` présents | CI (`gardes.py` appelle `memnius.py verifier`) | C2, C9 |
-| **A4 Journal en ajout seul** | Aucune entrée existante de `decisions/` modifiée ou supprimée ; chaque entrée a ses champs et un marqueur d'origine | CI | C2, C4 |
+| **A3 Structure** | README.md, AGENTS.md, `memnius.yaml` valide, journal `registre/decisions/` et `PASSATION.md` présents | CI (`gardes.py` appelle `memnius.py verifier`) | C2, C9 |
+| **A4 Journal en ajout seul** | Aucune entrée existante de `registre/decisions/` modifiée ou supprimée ; chaque entrée a ses champs et un marqueur d'origine | CI | C2, C4 |
 | **A5 Renvois aux règles** | Tout renvoi à une règle (C3, R5…) dans les fichiers de gouvernance désigne une règle qui existe et n'est pas abrogée | CI | C3 |
 | **A6 Gros fichiers** | Aucun fichier de plus de 10 Mo hors Git LFS | CI et pre-commit | C7, drive commun (0011) |
-| **A7 Registre du projet** | `registre/` a la structure commune ; chaque carte a ses champs (titre, résumé, où, auteurs, date) ; ses chemins existent dans le dépôt et ses liens visent des cartes connues ; l'index est à jour. Signale sans bloquer le code et les données qu'aucune carte ne décrit | CI (`outils/gardes.py` appelle `memnius.py`) | C11 |
+| **A7 Registre du projet** | `registre/` a la structure commune ; chaque carte a ses champs (titre, résumé, où, auteurs, date) ; ses chemins existent dans le dépôt et ses liens visent des cartes connues ; l'index et le bloc de liens de chaque carte sont à jour. Signale sans bloquer le code et les données qu'aucune carte ne décrit | CI (`outils/gardes.py` appelle `memnius.py`) | C11 |
 
 Sur GitHub, le ruleset de `main` exige une pull request approuvée par une autre personne que son auteur
 (GitHub interdit à l'auteur d'approuver sa propre pull request) et le succès du workflow des gardes :
@@ -93,8 +93,10 @@ Un dépôt adopte une option par une entrée de son journal qui dit pourquoi, et
 
 ## Journal de décisions
 
-Chaque dépôt tient son journal dans `decisions/`, un fichier par décision nommé par un numéro à quatre
-chiffres, éventuellement suivi d'un titre court (`decisions/0001.md` ou `decisions/0001-adopter-le-socle.md`).
+Chaque projet tient son journal dans son registre, `registre/decisions/` (décision 0016), un fichier par
+décision nommé par un numéro à quatre chiffres, éventuellement suivi d'un titre court
+(`registre/decisions/0001.md` ou `registre/decisions/0001-adopter-le-socle.md`). Le dépôt commun garde le
+sien à la racine, dans `decisions/` : il n'a pas de registre de projet.
 Ajouter une décision ne touche jamais un fichier existant. Format, vérifié par A4 :
 
 ```markdown
@@ -115,7 +117,9 @@ l'ancienne. Un marquage d'origine faux est pire qu'une absence de marquage : dan
 
 ## Registre du projet et super-registre
 
-Chaque dépôt de projet range ses cartes dans `registre/code/`, `registre/donnees/` et `registre/sources/` ;
+Tout ce qui décrit un projet est dans son dossier `registre/` : le journal `registre/decisions/`, dont
+chaque entrée est une carte de décision, et les cartes rangées dans `registre/code/`, `registre/donnees/` et
+`registre/sources/` ;
 le format est décrit dans `modeles/projet/registre/README.md`, les modèles de chaque type de carte dans
 `modeles/cartes/` et le schéma dans `schema/carte.schema.json`. Une carte
 est un fichier Markdown qui commence par un en-tête YAML entre deux lignes `---` :
@@ -131,7 +135,10 @@ date: 2026-09-26
 ```
 
 `memnius.py index` en tire `registre/INDEX.md` (lecture humaine, avec « qui a fait quoi ») et
-`registre/index.json` (machines). Chaque nuit, le super-registre de ce dépôt lit la fiche et l'index de
+`registre/index.json` (machines). Il écrit aussi, juste sous l'en-tête de chaque carte, un bloc qui rend
+cliquables les fichiers et adresses de `ou`, `url` et `doi` et les cartes de `liens` : GitHub affiche
+l'en-tête en tableau, sans liens. Ce bloc est dérivé comme l'index ; A7 refuse qu'il soit périmé ou retouché.
+`INDEX.md` et `CARTES.md` rendent eux aussi chaque emplacement cliquable. Chaque nuit, le super-registre de ce dépôt lit la fiche et l'index de
 chaque projet de l'organisation et publie, sur sa branche `super-registre`, `REGISTRE.md` (les projets),
 `CARTES.md` (toutes les cartes et qui a fait quoi) et `registre.json`. Un dépôt de l'organisation est un
 projet s'il porte le topic GitHub `memnius-projet`.
@@ -164,9 +171,11 @@ occasionnel n'a qu'une obligation : lire la section 5 avant de commencer.
 
 Il n'y a pas de dépôt modèle à copier (décision 0015) : un projet garde son organisation propre. Pour
 entrer dans le socle, il lui faut les fichiers que vérifie la garde A3 (README.md, AGENTS.md, `memnius.yaml`,
-PASSATION.md, journal `decisions/`), le dossier `registre/` vérifié par A7 et le workflow des gardes.
+PASSATION.md, journal `registre/decisions/`), le reste du dossier `registre/` vérifié par A7 et le workflow des gardes.
 `memnius.py init` les crée à partir de `modeles/projet/`, sans jamais remplacer un fichier existant ; il
 reste à compléter `memnius.yaml` et à écrire les cartes, à partir des modèles de `modeles/cartes/`.
+Un projet qui tenait son journal à la racine le déplace avec son historique : `git mv decisions
+registre/decisions` (A3 et A4 le rappellent ; A4 accepte ce déplacement).
 
 ## Changer le socle
 

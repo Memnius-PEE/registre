@@ -25,7 +25,7 @@ liens:                         # (facultatif)
 socle:                         # socle commun suivi (Memnius-PEE/registre, REGLES.md)
   version: v2
   niveau: socle                # socle | recommande (dépôt à agents, R1–R8) | renforce (options O1–O8)
-  options: []                  # options adoptées, chacune par une entrée de decisions/, ex. [O6]
+  options: []                  # options adoptées, chacune par une entrée de registre/decisions/, ex. [O6]
 licence: CC-BY-4.0             # identifiant SPDX
 visibilite: public             # public | prive (un dépôt privé n'a pas de garde A1 en offre gratuite)
 cree_le: {{date}}

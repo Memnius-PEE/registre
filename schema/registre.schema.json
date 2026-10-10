@@ -97,7 +97,7 @@
                   "integer",
                   "null"
                 ],
-                "description": "Nombre d'entrées du journal decisions/"
+                "description": "Nombre d'entrées du journal registre/decisions/"
               },
               "archive_forge": {
                 "type": "boolean"

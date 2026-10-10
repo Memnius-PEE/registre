@@ -58,7 +58,7 @@ class Carte(DepotDeTest):
         code, sortie = lancer("carte", "decision", "choix-du-format", "--dossier", str(self.d),
                               "--titre", "Choisir le format", "--auteur", "mainteneur-test")
         self.assertEqual(code, 0, sortie)
-        chemin = self.d / "decisions/0002-choix-du-format.md"
+        chemin = self.d / "registre/decisions/0002-choix-du-format.md"
         texte = chemin.read_text(encoding="utf-8")
         self.assertTrue(texte.startswith("# 0002 — Choisir le format"), texte)
         self.assertIn("- Décidé par : @mainteneur-test", texte)
@@ -68,9 +68,10 @@ class Carte(DepotDeTest):
         self.assertIn("valeurs du modèle", sortie)
 
     def test_carte_existante_jamais_ecrasee(self):
+        avant = (self.d / "registre/code/calcul.md").read_text(encoding="utf-8")
         code, _ = lancer("carte", "code", "calcul", "--dossier", str(self.d))
         self.assertEqual(code, 1)
-        self.assertEqual((self.d / "registre/code/calcul.md").read_text(encoding="utf-8"), CARTE)
+        self.assertEqual((self.d / "registre/code/calcul.md").read_text(encoding="utf-8"), avant)
 
 
 class Init(unittest.TestCase):
@@ -92,7 +93,7 @@ class Init(unittest.TestCase):
         fiche = (self.d / "memnius.yaml").read_text(encoding="utf-8")
         self.assertIn("id: projet-existant", fiche)
         self.assertIn("- github: quelqu-un", fiche)
-        self.assertIn("@quelqu-un", (self.d / "decisions/0001-adopter-le-socle.md").read_text(encoding="utf-8"))
+        self.assertIn("@quelqu-un", (self.d / "registre/decisions/0001-adopter-le-socle.md").read_text(encoding="utf-8"))
         for f in ("AGENTS.md", "PASSATION.md", "registre/README.md", "registre/INDEX.md", ".github/workflows/memnius.yml"):
             self.assertTrue((self.d / f).exists(), f)
         self.assertNotIn("{{", "".join(p.read_text(encoding="utf-8") for p in self.d.rglob("*.md")))
@@ -108,10 +109,10 @@ class Init(unittest.TestCase):
         self.assertIn("sans carte : travaux/calcul.py", sortie)
 
     def test_journal_existant_garde(self):
-        (self.d / "decisions").mkdir()
-        (self.d / "decisions/0001-autre-chose.md").write_text("# 0001 — Autre chose\n", encoding="utf-8")
+        (self.d / "registre/decisions").mkdir(parents=True)
+        (self.d / "registre/decisions/0001-autre-chose.md").write_text("# 0001 — Autre chose\n", encoding="utf-8")
         lancer("init", str(self.d))
-        self.assertEqual(sorted(p.name for p in (self.d / "decisions").iterdir()), ["0001-autre-chose.md"])
+        self.assertEqual(sorted(p.name for p in (self.d / "registre/decisions").iterdir()), ["0001-autre-chose.md"])
 
 
 class Index(DepotDeTest):
@@ -125,6 +126,27 @@ class Index(DepotDeTest):
         md = (self.d / "registre/INDEX.md").read_text(encoding="utf-8")
         self.assertIn("[Calcul de test](code/calcul.md)", md)
         self.assertIn("- **@mainteneur-test** : décisions [0001]", md)
+
+    def test_liens_cliquables_dans_la_carte(self):
+        self.ecrire("registre/code/calcul.md", CARTE.replace(
+            "langage: python", "liens: [decisions/0001, sources/absente, autre:code/x]\nurl: https://exemple.org/calcul"))
+        journal = (self.d / "registre/decisions/0001-adopter-le-socle.md").read_text(encoding="utf-8")
+        memnius.ecrire_index(self.d)
+        texte = (self.d / "registre/code/calcul.md").read_text(encoding="utf-8")
+        entete, corps = memnius.lire_carte(texte)
+        self.assertEqual(entete["ou"], ["travaux/calcul.py"])
+        self.assertTrue(corps.startswith("\n" + memnius.DEBUT_LIENS), corps)
+        self.assertIn("- **Où :** [`travaux/calcul.py`](../../travaux/calcul.py) · [exemple.org](https://exemple.org/calcul)", corps)
+        self.assertIn("[decisions/0001](../decisions/0001-adopter-le-socle.md) · `sources/absente` · `autre:code/x`", corps)
+        self.assertTrue(corps.endswith("Notes libres.\n"), corps)
+        self.assertEqual((self.d / "registre/decisions/0001-adopter-le-socle.md").read_text(encoding="utf-8"), journal)
+        memnius.ecrire_index(self.d)
+        self.assertEqual((self.d / "registre/code/calcul.md").read_text(encoding="utf-8"), texte)
+
+    def test_carte_qui_ne_cite_rien(self):
+        texte = CARTE.replace("ou: [travaux/calcul.py]", "ou: [À_REMPLIR]")
+        self.assertEqual(memnius.avec_bloc_liens(texte, memnius.bloc_liens(
+            {"fichier": "registre/code/x.md", "ou": ["À_REMPLIR"]}, {})), texte)
 
     def test_meme_cartes_meme_index(self):
         avant = (self.d / "registre/index.json").read_text(encoding="utf-8")
@@ -151,7 +173,7 @@ class SuperRegistre(unittest.TestCase):
                 "README.md": "# Projet\n", "AGENTS.md": "# Agents\n", "CONTRIBUTING.md": "# Contribuer\n",
                 "PASSATION.md": "# Passation\n", ".github/workflows/memnius.yml": "name: Memnius\n",
                 "memnius.yaml": FICHE.format(id=nom).replace("mainteneur-test", f"mainteneur-{nom}"),
-                "decisions/0001.md": "# 0001 — Adopter le socle\n\n- Date : 2026-10-10\n- Origine : [humain] « oui »\n- Décidé par : @Pwouette\n",
+                "registre/decisions/0001.md": "# 0001 — Adopter le socle\n\n- Date : 2026-10-10\n- Origine : [humain] « oui »\n- Décidé par : @Pwouette\n",
                 "travaux/calcul.py": "print(1)\n", "registre/README.md": "# Registre\n", "registre/code/calcul.md": carte,
                 "registre/donnees/.gitkeep": "", "registre/sources/.gitkeep": "",
             }
@@ -178,6 +200,7 @@ class SuperRegistre(unittest.TestCase):
         cartes = (self.sortie / "CARTES.md").read_text(encoding="utf-8")
         self.assertIn("## Code (2)", cartes)
         self.assertIn("| @Pwouette | alpha |", cartes)
+        self.assertIn("[`travaux/calcul.py`](", cartes)
 
     def test_projet_sans_registre(self):
         d = self.racine / "alpha"

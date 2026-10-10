@@ -5,12 +5,12 @@ Socle v2 prêt à publier : dépôts `regles` et `registre` fusionnés, registre
 
 ## 1. État mesuré *
 Tests lancés hors GitHub, dans le kit (dépôt de travail Pwouette/Memnius), le 2026-10-10 :
-`python3 -m unittest discover -s tests` → 53 tests, OK.
+`python3 -m unittest discover -s tests` → 59 tests, OK.
 À re-mesurer après la publication avec `python3 -m unittest discover -s tests -v`.
 
 ## 3. Décisions prises (numéros du journal)
 0001 à 0011 : socle v1 (2026-09-26 et 2026-10-01).
-0012 : archiviste abandonné jusqu'à nouvel ordre. 0013 : fusion de `regles` et `registre`. 0014 : registre par projet, cartes, index et super-registre (socle v2). 0015 : plus de dépôt gabarit, des modèles de cartes et `memnius.py init`.
+0012 : archiviste abandonné jusqu'à nouvel ordre. 0013 : fusion de `regles` et `registre`. 0014 : registre par projet, cartes, index et super-registre (socle v2). 0015 : plus de dépôt gabarit, des modèles de cartes et `memnius.py init`. 0016 : journal dans `registre/decisions/`, liens cliquables dans les cartes.
 
 ## 5. Ce qui reste dû ou en cours *
 1. Publier ce dépôt dans l'organisation GitHub du groupe (nom à confirmer) et poser l'étiquette v2.
