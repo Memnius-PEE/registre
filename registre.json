@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/2",
-  "genere_le": "2026-10-10T23:40:23+00:00",
+  "genere_le": "2026-10-10T23:54:34+00:00",
   "source": "https://github.com/Memnius-PEE",
   "projets": [
     {
@@ -309,6 +309,163 @@
           "auteur": "Romain Caldani",
           "statut": "ajoutée",
           "fichier": "registre/code/interfrange.md"
+        }
+      ]
+    },
+    {
+      "id": "horloge-hello",
+      "fiche": {
+        "schema": "memnius/2",
+        "id": "horloge-hello",
+        "titre": "Horloge Hello",
+        "resume": "Page web statique qui affiche l'heure en direct et dit « Hello world » quand on clique sur un bouton. Projet de test du kit Memnius, sans dépendance.",
+        "statut": "actif",
+        "nature": "outil",
+        "domaines": [
+          "informatique"
+        ],
+        "mots_cles": [
+          "html",
+          "javascript"
+        ],
+        "langue": "fr",
+        "mainteneurs": [
+          {
+            "github": "Pwouette"
+          }
+        ],
+        "contribution": {
+          "ouverte": true,
+          "niveau_entree": "facile"
+        },
+        "outils": [],
+        "agents": {
+          "politique": "relecture-humaine"
+        },
+        "liens": {
+          "projets": [],
+          "externes": []
+        },
+        "socle": {
+          "version": "v2",
+          "options": []
+        },
+        "licence": "CC-BY-4.0",
+        "visibilite": "public",
+        "cree_le": "2026-10-11"
+      },
+      "depot": {
+        "chemin": "Memnius-PEE/horloge-hello",
+        "url": "https://github.com/Memnius-PEE/horloge-hello",
+        "branche": "main",
+        "dernier_commit": "b9539c83d5913a9d0264a2d755fcaabce6b77c8e",
+        "derniere_activite": "2026-10-10T23:53:48Z",
+        "archive_forge": false,
+        "prive": false,
+        "etoiles": 0,
+        "tickets_ouverts": 0,
+        "branche_protegee": true
+      },
+      "conformite": {
+        "niveau": "avertissements",
+        "erreurs": [],
+        "avertissements": [
+          "fichier recommandé absent : CONTRIBUTING.md"
+        ]
+      },
+      "index": {
+        "schema": "memnius-index/1",
+        "projet": "horloge-hello",
+        "titre": "Horloge Hello",
+        "comptes": {
+          "decision": 2,
+          "code": 1,
+          "donnees": 0,
+          "sources": 0
+        },
+        "cartes": [
+          {
+            "type": "decision",
+            "id": "decisions/0001",
+            "fichier": "registre/decisions/0001-adopter-le-socle.md",
+            "titre": "0001 — Adopter le socle commun Memnius v2",
+            "resume": "Le projet suit les règles et les gardes A1–A7 du socle v2, ainsi que les options déclarées dans `memnius.yaml` (`socle.options`).",
+            "ou": [
+              "registre/decisions/0001-adopter-le-socle.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-10-11",
+            "origine": [
+              "humain"
+            ],
+            "url": "https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0001-adopter-le-socle.md"
+          },
+          {
+            "type": "decision",
+            "id": "decisions/0002",
+            "fichier": "registre/decisions/0002-page-statique-sans-dependance.md",
+            "titre": "0002 — Page statique sans dépendance",
+            "resume": "La page est un simple fichier HTML et un script JavaScript, sans bibliothèque ni étape de construction : elle s'ouvre directement dans un navigateur et sert à éprouver le kit Memnius de bout en bout.",
+            "ou": [
+              "registre/decisions/0002-page-statique-sans-dependance.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-10-11",
+            "origine": [
+              "humain"
+            ],
+            "url": "https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0002-page-statique-sans-dependance.md"
+          },
+          {
+            "type": "code",
+            "id": "code/page-horloge",
+            "fichier": "registre/code/page-horloge.md",
+            "titre": "Page horloge et Hello world",
+            "resume": "Page web statique qui affiche l'heure locale, mise à jour chaque seconde, et écrit « Hello world » quand on clique sur le bouton.",
+            "ou": [
+              "site/index.html",
+              "site/horloge.js"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "commande": "ouvrir site/index.html dans un navigateur",
+            "date": "2026-10-11",
+            "langage": "javascript",
+            "liens": [
+              "decisions/0002"
+            ],
+            "mots_cles": [],
+            "statut": "a-relire",
+            "url": "https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md"
+          }
+        ]
+      },
+      "modifications": [
+        {
+          "sha": "b3ca1152feb6dc356fdcad44f7991004dc344764",
+          "date": "2026-10-10T23:50:23Z",
+          "auteur": "Romain Caldani",
+          "statut": "ajoutée",
+          "fichier": "registre/code/page-horloge.md"
+        },
+        {
+          "sha": "b3ca1152feb6dc356fdcad44f7991004dc344764",
+          "date": "2026-10-10T23:50:23Z",
+          "auteur": "Romain Caldani",
+          "statut": "ajoutée",
+          "fichier": "registre/decisions/0002-page-statique-sans-dependance.md"
+        },
+        {
+          "sha": "9159fa330ec13ebb12b0b20f5df2dc18b2449d64",
+          "date": "2026-10-10T23:49:42Z",
+          "auteur": "Romain Caldani",
+          "statut": "ajoutée",
+          "fichier": "registre/decisions/0001-adopter-le-socle.md"
         }
       ]
     }
