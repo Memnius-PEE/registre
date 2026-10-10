@@ -1,6 +1,7 @@
-# Super-registre : chaque nuit et à la demande (onglet Actions → Run workflow), lit la fiche et l'index
-# du registre de chaque projet de l'organisation, puis publie REGISTRE.md, CARTES.md et registre.json
-# sur la branche « super-registre » de ce dépôt.
+# Super-registre : chaque nuit et à la demande (onglet Actions → Run workflow), lit la fiche, l'index et
+# l'historique du registre de chaque projet de l'organisation, puis publie REGISTRE.md, CARTES.md,
+# registre.json et ACCUEIL.md sur la branche « super-registre » de ce dépôt, et ACCUEIL.md comme page
+# d'accueil de l'organisation (profile/README.md du dépôt .github).
 #
 # Pourquoi une branche à part : main est protégée (garde A1) et n'accepte que des pull requests relues ;
 # les fichiers générés vont donc sur « super-registre », que le ruleset de main ne couvre pas.
@@ -9,6 +10,11 @@
 # privés, installer la GitHub App dédiée « memnius-registre » (décision 0007 : permissions Contents et
 # Metadata en lecture seule, sur tous les dépôts de l'organisation) et renseigner la variable
 # MEMNIUS_APP_ID et le secret MEMNIUS_APP_CLE (clé privée de l'App).
+#
+# Page d'accueil : le jeton du workflow n'écrit que dans ce dépôt. Pour écrire dans le dépôt .github, une
+# clé de déploiement avec droit d'écriture sur .github seulement (créée par creer-accueil.sh du kit) :
+# sa clé publique est déclarée dans .github, sa clé privée est le secret MEMNIUS_ACCUEIL_CLE de ce dépôt.
+# Sans ce secret, l'étape ne fait rien ; ACCUEIL.md reste consultable sur la branche super-registre.
 name: Super-registre
 on:
   schedule:
@@ -50,8 +56,27 @@ jobs:
           else
             git worktree add --quiet --orphan -b super-registre /tmp/branche
           fi
-          cp /tmp/sortie/REGISTRE.md /tmp/sortie/CARTES.md /tmp/sortie/registre.json /tmp/branche/
+          cp /tmp/sortie/REGISTRE.md /tmp/sortie/CARTES.md /tmp/sortie/registre.json /tmp/sortie/ACCUEIL.md /tmp/branche/
           cd /tmp/branche
-          git add REGISTRE.md CARTES.md registre.json
+          git add REGISTRE.md CARTES.md registre.json ACCUEIL.md
           git diff --cached --quiet || git commit --quiet -m "Super-registre regénéré (exécution ${{ github.run_id }})"
           git push --quiet origin super-registre
+      - name: Publier la page d'accueil de l'organisation (dépôt .github)
+        env:
+          CLE: ${{ secrets.MEMNIUS_ACCUEIL_CLE }}
+          DEPOT: git@github.com:${{ github.repository_owner }}/.github.git
+        run: |
+          if [ -z "$CLE" ]; then
+            echo "::notice::Secret MEMNIUS_ACCUEIL_CLE absent : page d'accueil non publiée (voir creer-accueil.sh du kit)."
+            exit 0
+          fi
+          install -m 700 -d ~/.ssh && install -m 600 /dev/null ~/.ssh/accueil && printf '%s\n' "$CLE" > ~/.ssh/accueil
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/accueil -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          git clone --quiet --depth 1 "$DEPOT" /tmp/accueil
+          mkdir -p /tmp/accueil/profile && cp /tmp/sortie/ACCUEIL.md /tmp/accueil/profile/README.md
+          cd /tmp/accueil
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add profile/README.md
+          git diff --cached --quiet || git commit --quiet -m "Page d'accueil regénérée par le super-registre (exécution ${{ github.run_id }})"
+          git push --quiet origin HEAD

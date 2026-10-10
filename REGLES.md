@@ -140,7 +140,9 @@ sur chaque pull request et commite le résultat ; un contributeur n'a qu'à écr
 `INDEX.md` et `CARTES.md` rendent eux aussi chaque emplacement cliquable. Chaque nuit, le super-registre de ce dépôt lit la fiche et l'index de
 chaque projet de l'organisation et publie, sur sa branche `super-registre`, `REGISTRE.md` (les projets),
 `CARTES.md` (toutes les cartes et qui a fait quoi) et `registre.json`. Un dépôt de l'organisation est un
-projet s'il porte le topic GitHub `memnius-projet`.
+projet s'il porte le topic GitHub `memnius-projet`. Il réécrit aussi la page d'accueil de l'organisation
+(`profile/README.md` du dépôt `.github`, décision 0018) : où trouver ces règles, leur résumé, et les dix
+dernières cartes et décisions ajoutées ou modifiées dans les projets publics. Un projet privé n'y figure jamais.
 
 ## Faire entrer un projet
 
