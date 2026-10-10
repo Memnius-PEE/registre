@@ -29,7 +29,6 @@ FICHE = textwrap.dedent("""\
       politique: relecture-humaine
     socle:
       version: v2
-      niveau: socle
       options: []
     licence: CC-BY-4.0
     visibilite: public
@@ -73,9 +72,8 @@ class DepotDeTest(unittest.TestCase):
         self.d.mkdir()
         fichiers = {
             "README.md": "# Sujet de test\n\nVoir la règle C2 et la garde A4.\n",
-            "AGENTS.md": "# Agents\n\nAppliquer C1–C10 ; R2 si des agents écrivent.\n",
+            "AGENTS.md": "# Agents\n\nAppliquer C1–C11 ; O6 si des agents lisent trop large. R2 est abrogée.\n",
             "CONTRIBUTING.md": "# Contribuer\n",
-            "PASSATION.md": "# Passation\n\n## 5. Ce qui reste dû ou en cours *\n- rien\n",
             ".github/workflows/memnius.yml": "name: Memnius\n",
             "memnius.yaml": FICHE.format(id="sujet-test"),
             "registre/decisions/0001-adopter-le-socle.md": ENTREE.format(n="0001"),
@@ -98,13 +96,13 @@ class DepotDeTest(unittest.TestCase):
     def tearDown(self):
         self._tmp.cleanup()
 
-    def ecrire(self, chemin, texte, commit=True):
+    def ecrire(self, chemin, texte, commit=True, message="changement"):
         p = self.d / chemin
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(texte, encoding="utf-8")
         sh(self.d, "git", "add", "-A")
         if commit:
-            sh(self.d, "git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "changement")
+            sh(self.d, "git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", message)
 
     def gardes(self, *options):
         r = subprocess.run([sys.executable, str(GARDES), str(self.d), *options], capture_output=True, text=True)
@@ -154,9 +152,37 @@ class A3Structure(DepotDeTest):
     def test_sain(self):
         self.assertVerte("A3")
 
-    def test_passation_absente(self):
-        (self.d / "PASSATION.md").unlink()
-        self.assertSonne("A3", "PASSATION.md")
+    def test_agents_absent(self):
+        (self.d / "AGENTS.md").unlink()
+        self.assertSonne("A3", "AGENTS.md")
+
+    def test_passation_plus_exigee(self):
+        self.assertFalse((self.d / "PASSATION.md").exists())
+        self.assertVerte("A3")
+
+    def test_fiche_allegee(self):
+        # Décision 0017 : seuls schema, id, titre, resume, langue, mainteneurs, socle et visibilite sont exigés.
+        self.ecrire("memnius.yaml", textwrap.dedent("""\
+            schema: memnius/2
+            id: sujet-test
+            titre: Sujet de test
+            resume: Fiche réduite aux champs obligatoires.
+            langue: fr
+            mainteneurs:
+              - github: mainteneur-test
+            socle:
+              version: v2
+            visibilite: public
+            """))
+        self.assertVerte("A3")
+
+    def test_champ_obligatoire_manquant(self):
+        self.ecrire("memnius.yaml", FICHE.format(id="sujet-test").replace("langue: fr\n", ""))
+        self.assertSonne("A3", "langue")
+
+    def test_niveau_du_socle_refuse(self):
+        self.ecrire("memnius.yaml", FICHE.format(id="sujet-test").replace("  version: v2\n", "  version: v2\n  niveau: socle\n"))
+        self.assertSonne("A3", "niveau")
 
     def test_fiche_invalide(self):
         self.ecrire("memnius.yaml", FICHE.format(id="sujet-test").replace("statut: actif", "statut: fini"))
@@ -183,6 +209,21 @@ class A4Journal(DepotDeTest):
 
     def test_entree_publiee_modifiee(self):
         self.ecrire("registre/decisions/0001-adopter-le-socle.md", ENTREE.format(n="0001") + "Ajout après coup.\n")
+        self.assertSonne("A4", "entrée publiée modifiée", "--base", self.base)
+
+    def test_coquille_corrigee(self):
+        corrigee = ENTREE.format(n="0001").replace("Adopter le socle", "Adopter le socle commun")
+        self.ecrire("registre/decisions/0001-adopter-le-socle.md", corrigee, message="Coquille dans la décision 0001")
+        self.assertVerte("A4", "--base", self.base)
+
+    def test_coquille_sans_le_dire(self):
+        corrigee = ENTREE.format(n="0001").replace("Adopter le socle", "Adopter le socle commun")
+        self.ecrire("registre/decisions/0001-adopter-le-socle.md", corrigee, message="petite retouche")
+        self.assertSonne("A4", "entrée publiée modifiée", "--base", self.base)
+
+    def test_coquille_qui_touche_un_champ(self):
+        corrigee = ENTREE.format(n="0001").replace("2026-09-26", "2026-09-27")
+        self.ecrire("registre/decisions/0001-adopter-le-socle.md", corrigee, message="coquille sur la date")
         self.assertSonne("A4", "entrée publiée modifiée", "--base", self.base)
 
     def test_entree_a_remplir_puis_remplie(self):
@@ -235,7 +276,16 @@ class A5Renvois(DepotDeTest):
         self.ecrire("memnius.yaml", FICHE.format(id="sujet-test").replace("options: []", "options: [O9]"))
         self.assertSonne("A5", "option du socle inconnue : O9")
 
-    def test_regle_abrogee(self):
+    def test_regle_abrogee_citee(self):
+        self.ecrire("AGENTS.md", "# Agents\n\nToute pull request est relue (C6).\n")
+        self.assertSonne("A5", "C6 est abrogée")
+
+    def test_regle_abrogee_dans_le_journal(self):
+        # Le journal est l'histoire : une ancienne entrée peut citer une règle abrogée depuis.
+        self.ecrire("registre/decisions/0002.md", ENTREE.format(n="0002") + "\nLes règles R1–R8 s'appliquent (C9).\n")
+        self.assertVerte("A5")
+
+    def test_regle_abrogee_modifiee(self):
         sys.path.insert(0, str(GARDES.parent))
         import gardes as module
         ancien = module.REGLES
@@ -263,9 +313,15 @@ class A6GrosFichiers(DepotDeTest):
         sh(self.d, "git", "add", "-A")
         self.assertSonne("A6", "donnees/brut/gros.bin (11.0 Mo)")
 
-    def test_pointeur_lfs_accepte(self):
+    def test_gros_fichier_lfs_refuse(self):
+        # Décision 0017 : Git LFS n'est plus une échappatoire, on mesure le fichier désigné par le pointeur.
         pointeur = "version https://git-lfs.github.com/spec/v1\noid sha256:" + "0" * 64 + "\nsize 50000000\n"
         self.ecrire("donnees/brut/gros.h5", pointeur, commit=False)
+        self.assertSonne("A6", "donnees/brut/gros.h5 (50.0 Mo)")
+
+    def test_petit_fichier_lfs_accepte(self):
+        pointeur = "version https://git-lfs.github.com/spec/v1\noid sha256:" + "0" * 64 + "\nsize 300000\n"
+        self.ecrire("donnees/brut/image.png", pointeur, commit=False)
         self.assertVerte("A6")
 
 
@@ -280,22 +336,15 @@ class A7Registre(DepotDeTest):
         memnius.ecrire_index(self.d)
         self.assertVerte("A7")
 
-    def test_index_perime(self):
+    def test_index_ecrit_par_la_ci(self):
+        # Règle C11 (décision 0017) : l'index et les blocs de liens sont écrits par la CI, A7 ne les contrôle pas.
         self.ecrire("registre/code/autre.md", CARTE)
-        self.assertSonne("A7", "index ou liens des cartes pas à jour")
-
-    def test_bloc_de_liens_edite_a_la_main(self):
-        carte = self.d / "registre/code/calcul.md"
-        self.ecrire("registre/code/calcul.md", carte.read_text(encoding="utf-8").replace("../../travaux/calcul.py", "ailleurs.py"))
-        self.assertSonne("A7", "registre/code/calcul.md")
-
-    def test_bloc_de_liens_retire(self):
-        self.ecrire("registre/code/calcul.md", CARTE)
-        self.assertSonne("A7", "registre/code/calcul.md")
-
-    def test_index_edite_a_la_main(self):
         self.ecrire("registre/INDEX.md", "# Index retouché\n")
-        self.assertSonne("A7", "registre/INDEX.md")
+        self.assertVerte("A7")
+        (self.d / "registre/INDEX.md").unlink()
+        (self.d / "registre/index.json").unlink()
+        sh(self.d, "git", "add", "-A")
+        self.assertVerte("A7")
 
     def test_carte_sans_auteur(self):
         self.ecrire("registre/code/calcul.md", CARTE.replace("auteurs: [mainteneur-test]\n", ""))

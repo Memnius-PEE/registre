@@ -10,10 +10,9 @@ Usage :
 
 Sortie : une ligne « [ ok ] » ou « [FIRE] » par garde, puis un bilan. Code de sortie 1 si une garde
 a sonné ou n'a pas pu tourner : une garde qui n'a pas tourné compte comme un échec, jamais comme un succès.
-A2 et A6 n'utilisent que la bibliothèque standard ; A3, A5 et A7 ont besoin de PyYAML.
+A2 et A6 n'utilisent que la bibliothèque standard ; A4 tolère une coquille corrigée (C2) ; A3, A5 et A7 ont besoin de PyYAML.
 """
 import argparse
-import json
 import os
 import re
 import subprocess
@@ -151,6 +150,19 @@ def controler_entree(f, texte):
     return defauts
 
 
+def coquille(dossier, base, f):
+    """Une entrée publiée peut être retouchée pour une coquille (C2) : chaque commit qui la modifie depuis
+    la base dit « coquille » dans son message, et Date, Origine et Décidé par restent identiques."""
+    messages = git(dossier, "log", "--format=%B%x00", f"{base}..HEAD", "--", f).decode(errors="replace")
+    messages = [m for m in messages.split("\0") if m.strip()]
+    if not messages or not all("coquille" in m.lower() for m in messages):
+        return False
+    avant = git(dossier, "show", f"{base}:{f}").decode(errors="replace")
+    apres = (dossier / f).read_text(encoding="utf-8", errors="replace")
+    champs = lambda texte: {m.group(1): m.group(2).strip() for m in CHAMP.finditer(texte)}  # noqa: E731
+    return champs(avant) == champs(apres)
+
+
 def garde_a4(dossier, fichiers, base=None, **_):
     defauts, numeros = [], {}
     entrees = []
@@ -172,6 +184,7 @@ def garde_a4(dossier, fichiers, base=None, **_):
     if not entrees:
         defauts.append(f"aucune entrée dans {JOURNAL} (au moins l'adoption du socle)")
     portee = "format seul, pas de commit de référence"
+    coquilles = 0
     if base and set(base) != {"0"}:
         sortie = git(dossier, "diff", "--name-status", "-M", base, "HEAD", "--", JOURNAL).decode()
         for ligne in sortie.splitlines():
@@ -180,9 +193,12 @@ def garde_a4(dossier, fichiers, base=None, **_):
             if NOM_ENTREE.match(ancien) and etat[0] in "MDRT":
                 if RESTES_GABARIT.search(git(dossier, "show", f"{base}:{ancien}").decode(errors="replace")):
                     continue  # entrée encore à remplir : pas encore publiée
+                if etat[0] == "M" and coquille(dossier, base, ancien):
+                    coquilles += 1
+                    continue
                 action = {"M": "modifiée", "D": "supprimée", "R": "renommée", "T": "changée de type"}[etat[0]]
                 defauts.append(f"{ancien} : entrée publiée {action} (C2 : corriger par une nouvelle entrée)")
-        portee = f"comparé à {base[:10]}"
+        portee = f"comparé à {base[:10]}" + (f", {coquilles} coquille(s) corrigée(s)" if coquilles else "")
     if defauts:
         raise Feu("; ".join(defauts))
     return f"{len(entrees)} entrées, {portee}"
@@ -195,19 +211,21 @@ RENVOI = re.compile(r"(?<![\w/.#@-])([CROA])(\d{1,2})(?![\w])")
 
 
 def garde_a5(dossier, fichiers, **_):
+    """Le journal est l'histoire : il peut citer une règle abrogée, comme une ligne qui dit qu'elle l'est."""
     ref = charger_regles()
     connus = {**ref.get("regles", {}), **ref.get("gardes", {})}
     defauts, compte = [], 0
     for f in fichiers:
         if not FICHIERS_GOUVERNANCE.match(f):
             continue
+        historique = f.startswith(JOURNAL)
         for n, ligne in enumerate((dossier / f).read_text(encoding="utf-8", errors="replace").splitlines(), 1):
             for m in RENVOI.finditer(ligne):
                 code = m.group(1) + m.group(2)
                 compte += 1
                 if code not in connus:
                     defauts.append(f"{f}:{n} : {code} n'existe pas")
-                elif (connus[code] or {}).get("abrogee"):
+                elif (connus[code] or {}).get("abrogee") and not historique and "abrog" not in ligne.lower():
                     defauts.append(f"{f}:{n} : {code} est abrogée")
     meta = dossier / "memnius.yaml"
     if meta.exists():
@@ -227,7 +245,17 @@ def garde_a5(dossier, fichiers, **_):
 # ------------------------------------------------------------------ A6 gros fichiers
 
 
+POINTEUR_LFS = re.compile(rb"^version https://git-lfs\.github\.com/spec/v1\n(?:.*\n)*?size (\d+)", re.M)
+
+
+def taille_lfs(dossier, sha):
+    """Taille du fichier désigné par un pointeur Git LFS, ou None si l'objet n'en est pas un."""
+    m = POINTEUR_LFS.match(git(dossier, "cat-file", "blob", sha))
+    return int(m.group(1)) if m else None
+
+
 def garde_a6(dossier, fichiers, **_):
+    """Git LFS n'est pas une échappatoire (décision 0017) : on mesure le fichier, pas son pointeur."""
     seuil = SEUIL_GROS_FICHIER
     try:
         seuil = charger_regles()["gardes"]["A6"]["seuil_octets"]
@@ -247,11 +275,14 @@ def garde_a6(dossier, fichiers, **_):
             r = subprocess.run(["git", "-C", str(dossier), "cat-file", "--batch-check=%(objectsize)"],
                                input="\n".join(objets.values()) + "\n", capture_output=True, text=True, check=True)
             tailles = dict(zip(objets, (int(t) for t in r.stdout.split())))
+            for chemin, taille in list(tailles.items()):
+                if taille < 1024 and (vraie := taille_lfs(dossier, objets[chemin])) is not None:
+                    tailles[chemin] = vraie
     else:
         tailles = {f: (dossier / f).stat().st_size for f in fichiers}
     gros = [f"{f} ({t / 1_000_000:.1f} Mo)" for f, t in sorted(tailles.items()) if t > seuil]
     if gros:
-        raise Feu(f"au-delà de {seuil / 1_000_000:g} Mo hors Git LFS : " + ", ".join(gros))
+        raise Feu(f"au-delà de {seuil / 1_000_000:g} Mo, Git LFS compris (à mettre dans le drive commun) : " + ", ".join(gros))
     return f"{len(tailles)} fichiers sous {seuil / 1_000_000:g} Mo"
 
 
@@ -259,11 +290,12 @@ def garde_a6(dossier, fichiers, **_):
 
 
 def garde_a7(dossier, **_):
-    erreurs, avertissements = memnius().verifier_registre(dossier)
+    m = memnius()
+    erreurs, avertissements = m.verifier_registre(dossier)
     if erreurs:
         raise Feu("; ".join(erreurs))
-    index = json.loads((dossier / "registre" / "index.json").read_text(encoding="utf-8"))
-    detail = f"{len(index['cartes'])} carte(s), index à jour"
+    cartes, _ = m.cartes_du_projet(dossier, m.lister_fichiers(dossier))
+    detail = f"{len(cartes)} carte(s) valides (l'index est écrit par la CI)"
     if avertissements:
         detail += " ; attention : " + " ; ".join(avertissements)
     return detail

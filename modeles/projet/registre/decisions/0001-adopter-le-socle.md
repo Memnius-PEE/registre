@@ -7,5 +7,5 @@
 - Source : socle Memnius-PEE/registre v2, fichiers créés par « memnius.py init »
 - Remplace : —
 
-Le projet suit les règles C1–C11 et les gardes A1–A7 du socle v2, au niveau déclaré dans
-`memnius.yaml` (`socle.niveau`).
+Le projet suit les règles et les gardes A1–A7 du socle v2, ainsi que les options déclarées dans
+`memnius.yaml` (`socle.options`).

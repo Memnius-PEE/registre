@@ -1,10 +1,14 @@
-# Gardes du socle commun Memnius (A2 à A7), maintenues dans le dépôt registre de l'organisation.
+# Gardes du socle commun Memnius (A2 à A7) et index du registre, maintenus dans le dépôt registre de l'organisation.
 # Le ruleset de main exige que ce contrôle soit vert avant toute fusion (garde A1).
 name: Memnius
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:   # relance après le commit de l'index du registre par la CI (règle C11)
+permissions:
+  contents: write      # la CI commite l'index du registre sur la branche de la pull request
+  actions: write       # puis relance ce workflow sur ce commit
 jobs:
   gardes:
     uses: Memnius-PEE/registre/.github/workflows/gardes.yml@v2

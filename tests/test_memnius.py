@@ -94,7 +94,8 @@ class Init(unittest.TestCase):
         self.assertIn("id: projet-existant", fiche)
         self.assertIn("- github: quelqu-un", fiche)
         self.assertIn("@quelqu-un", (self.d / "registre/decisions/0001-adopter-le-socle.md").read_text(encoding="utf-8"))
-        for f in ("AGENTS.md", "PASSATION.md", "registre/README.md", "registre/INDEX.md", ".github/workflows/memnius.yml"):
+        self.assertFalse((self.d / "PASSATION.md").exists())
+        for f in ("AGENTS.md", "registre/README.md", "registre/INDEX.md", ".github/workflows/memnius.yml"):
             self.assertTrue((self.d / f).exists(), f)
         self.assertNotIn("{{", "".join(p.read_text(encoding="utf-8") for p in self.d.rglob("*.md")))
 
@@ -171,7 +172,7 @@ class SuperRegistre(unittest.TestCase):
             d = self.racine / nom
             fichiers = {
                 "README.md": "# Projet\n", "AGENTS.md": "# Agents\n", "CONTRIBUTING.md": "# Contribuer\n",
-                "PASSATION.md": "# Passation\n", ".github/workflows/memnius.yml": "name: Memnius\n",
+                ".github/workflows/memnius.yml": "name: Memnius\n",
                 "memnius.yaml": FICHE.format(id=nom).replace("mainteneur-test", f"mainteneur-{nom}"),
                 "registre/decisions/0001.md": "# 0001 — Adopter le socle\n\n- Date : 2026-10-10\n- Origine : [humain] « oui »\n- Décidé par : @Pwouette\n",
                 "travaux/calcul.py": "print(1)\n", "registre/README.md": "# Registre\n", "registre/code/calcul.md": carte,

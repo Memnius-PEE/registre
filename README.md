@@ -9,7 +9,7 @@ ce qui était auparavant dans deux dépôts (`regles` et l'ancien `registre`, d�
 
 | Fichier | Contenu |
 |---|---|
-| [`REGLES.md`](REGLES.md) | texte de référence : C1–C11, A1–A7, R1–R8, O1–O8, registre, journal, passation |
+| [`REGLES.md`](REGLES.md) | texte de référence : C1–C11, A1–A7, O1–O8, registre, journal |
 | [`regles.yaml`](regles.yaml) | liste des règles et gardes, lue par la garde A5 |
 | [`vocabulaire.yaml`](vocabulaire.yaml) | domaines (liste fermée), outils, versions du socle |
 | [`schema/`](schema/) | schémas de `memnius.yaml` (`memnius/2`) et des cartes |
@@ -33,7 +33,7 @@ en tire l'index du projet et rend cliquables, dans chaque carte, les fichiers qu
 ```bash
 python3 outils/memnius.py init ../mon-projet --titre "Mon projet" --mainteneur moi   # fichiers exigés, rien n'est remplacé
 python3 outils/memnius.py carte code calcul-interfrange --dossier ../mon-projet --ou travaux/interfrange.py --auteur moi
-python3 outils/memnius.py index ../mon-projet        # écrit registre/INDEX.md, registre/index.json et les liens des cartes
+python3 outils/memnius.py index ../mon-projet        # écrit registre/INDEX.md, registre/index.json et les liens des cartes (la CI le fait sur chaque pull request)
 python3 outils/memnius.py verifier ../mon-projet     # gardes A3 et A7
 python3 outils/gardes.py ../mon-projet               # toutes les gardes, comme la CI
 ```
