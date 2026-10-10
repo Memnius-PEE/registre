@@ -17,7 +17,8 @@ Usage :
   python3 memnius.py registre --github ORG [--github AUTRE] [--sortie DIR]
   python3 memnius.py registre --local DOSSIER-DES-CLONES [--sortie DIR]
       Construit le super-registre : REGISTRE.md (les projets), CARTES.md (toutes les cartes, et qui a
-      fait quoi) et registre.json. Un dépôt de l'organisation est un projet s'il porte le topic GitHub
+      fait quoi), registre.json et ACCUEIL.md, la page d'accueil de l'organisation (modeles/accueil.md
+      complété par les dernières modifications des registres des projets publics). Un dépôt de l'organisation est un projet s'il porte le topic GitHub
       « memnius-projet ». Jeton lu dans GITHUB_TOKEN (facultatif si tous les dépôts sont publics).
 
 Tout le registre vit dans registre/ : les cartes de décision sont les entrées du journal registre/decisions/,
@@ -44,6 +45,7 @@ SCHEMA_FICHE = ICI / "schema" / "memnius.schema.json"
 SCHEMA_CARTE = ICI / "schema" / "carte.schema.json"
 VOCABULAIRE = ICI / "vocabulaire.yaml"
 MODELES = ICI / "modeles"
+MODELE_ACCUEIL = MODELES / "accueil.md"
 
 # Garde A3 du socle : README, AGENTS.md, memnius.yaml et un journal registre/decisions/ non vide.
 FICHIERS_OBLIGATOIRES = ["README.md", "AGENTS.md", "memnius.yaml"]
@@ -67,6 +69,9 @@ CHAMPS_PAR_TYPE = {"langage": "code", "commande": "code", "format": "donnees", "
 # Fichiers qu'une carte devrait couvrir (avertissement seulement) : le code et les données.
 A_COUVRIR = re.compile(r"^(travaux|donnees)/")
 HORS_COUVERTURE = re.compile(r"(^|/)(\.gitkeep|README\.md)$")
+
+NB_MODIFICATIONS = 10  # lignes de « Dernières modifications » sur la page d'accueil de l'organisation
+TYPE_SINGULIER = {"decision": "décision", "code": "code", "donnees": "données", "sources": "source"}
 
 SUJET_GITHUB = "memnius-projet"  # topic GitHub qui marque un dépôt de projet dans l'organisation
 
@@ -622,12 +627,14 @@ def entree_locale(dossier, vocab, registre=True):
             "dernier_commit": git_local(dossier, "rev-parse", "HEAD"),
             "derniere_activite": activite,
             "archive_forge": False,
+            "prive": False,
             "etoiles": None,
             "tickets_ouverts": None,
             "branche_protegee": None,
         },
         "conformite": conformite,
         "index": index,
+        "modifications": modifications_locales(dossier),
     }
 
 
@@ -741,13 +748,132 @@ def entree_github(gh, depot, vocab):
             "dernier_commit": commit,
             "derniere_activite": depot.get("pushed_at"),
             "archive_forge": bool(depot.get("archived")),
+            "prive": bool(depot.get("private")),
             "etoiles": depot.get("stargazers_count"),
             "tickets_ouverts": depot.get("open_issues_count"),
             "branche_protegee": protegee,
         },
         "conformite": conformite,
         "index": index,
+        "modifications": modifications_github(gh, nom, branche) if branche else [],
     }
+
+
+# --------------------------------------------- super-registre : dernières modifications des registres
+
+
+def est_carte(fichier):
+    """Vrai pour une entrée du journal ou une carte rangée ; faux pour l'index, le README et les .gitkeep."""
+    parties = PurePosixPath(fichier).parts
+    return bool(ENTREE_JOURNAL.match(fichier)) or (
+        len(parties) == 3 and parties[0] == REGISTRE and parties[1] in TYPES_RANGES and parties[2].endswith(".md"))
+
+
+def est_robot(*noms):
+    return any("[bot]" in (n or "") for n in noms)
+
+
+def changements(commit):
+    """Un commit (sha, date, auteur, [(statut, fichier)]) → une modification par carte touchée."""
+    return [{"sha": commit["sha"], "date": commit["date"], "auteur": commit["auteur"], "statut": statut, "fichier": f}
+            for statut, f in commit["fichiers"] if est_carte(f)]
+
+
+STATUTS_GIT = {"A": "ajoutée", "M": "modifiée", "D": "supprimée", "R": "renommée", "C": "ajoutée"}
+STATUTS_GITHUB = {"added": "ajoutée", "modified": "modifiée", "changed": "modifiée", "removed": "supprimée",
+                  "renamed": "renommée", "copied": "ajoutée"}
+
+
+def modifications_locales(dossier, n=NB_MODIFICATIONS):
+    """Dernières cartes ajoutées, modifiées ou supprimées d'un clone, d'après git log (fusions et robots exclus)."""
+    sortie = git_local(dossier, "log", "--no-merges", "-n", str(4 * n), "--format=%x1e%H%x1f%aI%x1f%an%x1f%ae",
+                       "--name-status", "--", REGISTRE)
+    modifications = []
+    for bloc in (sortie or "").split("\x1e"):
+        lignes = [l for l in bloc.strip().splitlines() if l.strip()]
+        if not lignes:
+            continue
+        sha, date, nom, courriel = lignes[0].split("\x1f")
+        if est_robot(nom, courriel):
+            continue
+        fichiers = []
+        for l in lignes[1:]:
+            champs = l.split("\t")
+            fichiers.append((STATUTS_GIT.get(champs[0][:1], "modifiée"), champs[-1]))
+        modifications += changements({"sha": sha, "date": date, "auteur": nom, "fichiers": fichiers})
+        if len(modifications) >= n:
+            break
+    return modifications[:n]
+
+
+def modifications_github(gh, nom, branche, n=NB_MODIFICATIONS):
+    """Même chose par l'API GitHub : derniers commits touchant registre/, puis leurs fichiers."""
+    commits, _ = gh.get(f"/repos/{nom}/commits", sha=branche, path=REGISTRE, per_page=2 * n)
+    modifications = []
+    for c in commits or []:
+        auteur = c.get("author") or {}
+        nom_git = ((c.get("commit") or {}).get("author") or {}).get("name")
+        if len(c.get("parents") or []) > 1 or auteur.get("type") == "Bot" or est_robot(auteur.get("login"), nom_git):
+            continue
+        detail, _ = gh.get(f"/repos/{nom}/commits/{c['sha']}")
+        fichiers = [(STATUTS_GITHUB.get(f.get("status"), "modifiée"), f["filename"]) for f in (detail or {}).get("files") or []]
+        modifications += changements({"sha": c["sha"], "date": c["commit"]["author"]["date"],
+                                      "auteur": auteur.get("login") or nom_git, "fichiers": fichiers})
+        if len(modifications) >= n:
+            break
+    return modifications[:n]
+
+
+def instant(date):
+    try:
+        return dt.datetime.fromisoformat(str(date).replace("Z", "+00:00")).astimezone(dt.timezone.utc)
+    except ValueError:
+        return dt.datetime.min.replace(tzinfo=dt.timezone.utc)
+
+
+def public(projet):
+    """Un projet privé, réellement ou par sa fiche, n'apparaît jamais sur la page d'accueil (C7)."""
+    return not projet["depot"].get("prive") and (projet["fiche"] or {}).get("visibilite") != "prive"
+
+
+def dernieres_modifications(projets, n=NB_MODIFICATIONS):
+    """Les n dernières modifications de cartes de tous les projets publics, la plus récente d'abord."""
+    lignes = []
+    for p in projets:
+        if not public(p):
+            continue
+        cartes = {c["fichier"]: c for c in (p["index"] or {}).get("cartes", [])}
+        url = p["depot"].get("url")
+        for m in p.get("modifications") or []:
+            carte = cartes.get(m["fichier"])
+            type_ = "decision" if ENTREE_JOURNAL.match(m["fichier"]) else PurePosixPath(m["fichier"]).parts[1]
+            if carte and m["statut"] != "supprimée":
+                lien = f"[{cellule(carte.get('titre') or carte['id'])}]({url_fichier(p, m['fichier'])})"
+            else:
+                nom = PurePosixPath(m["fichier"]).stem
+                lien = f"[`{nom}`]({url}/commit/{m['sha']})" if url else f"`{nom}`"
+            lignes.append((instant(m["date"]), p["id"], lien, TYPE_SINGULIER[type_], m["statut"], m["auteur"]))
+    lignes.sort(key=lambda l: l[0], reverse=True)
+    return lignes[:n]
+
+
+def ecrire_accueil(registre, chemin, organisation=None):
+    """Page d'accueil de l'organisation : partie fixe (modeles/accueil.md) puis dernières modifications."""
+    lignes = dernieres_modifications(registre["projets"])
+    if lignes:
+        tableau = ["| Date | Projet | Carte | Type | Changement | Par |", "|---|---|---|---|---|---|"]
+        tableau += [f"| {d:%Y-%m-%d} | {projet} | {lien} | {type_} | {statut} | {cellule(qui(auteur))} |"
+                    for d, projet, lien, type_, statut, auteur in lignes]
+        tableau += ["", f"_Les {len(lignes)} dernières cartes et décisions ajoutées ou modifiées dans les registres "
+                        "des projets publics, d'après leur historique Git. Toutes les cartes : "
+                        "[`CARTES.md`](https://github.com/Memnius-PEE/registre/blob/super-registre/CARTES.md)._"]
+        partie = "\n".join(tableau)
+    else:
+        partie = "_Aucune carte ni décision dans les registres des projets pour l'instant._"
+    texte = MODELE_ACCUEIL.read_text(encoding="utf-8").replace("{{DERNIERES_MODIFICATIONS}}", partie)
+    if organisation:
+        texte = texte.replace("Memnius-PEE", organisation)
+    chemin.write_text(texte.rstrip("\n") + "\n", encoding="utf-8")
 
 
 # ------------------------------------------------------------------ super-registre : sorties
@@ -884,6 +1010,7 @@ def construire_registre(args):
     (sortie / "registre.json").write_text(json.dumps(registre, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     ecrire_registre_md(registre, sortie / "REGISTRE.md")
     ecrire_cartes_md(registre, sortie / "CARTES.md")
+    ecrire_accueil(registre, sortie / "ACCUEIL.md", args.github[0] if args.github and len(args.github) == 1 else None)
     nb = {n: sum(p["conformite"]["niveau"] == n for p in projets) for n in ("conforme", "avertissements", "non-conforme")}
     cartes = sum(len((p["index"] or {}).get("cartes", [])) for p in projets)
     print(f"{len(projets)} projets, {cartes} cartes : {nb['conforme']} conformes, "
@@ -915,7 +1042,7 @@ def main():
     src = r.add_mutually_exclusive_group(required=True)
     src.add_argument("--local", help="dossier contenant un clone par projet")
     src.add_argument("--github", action="append", help="organisation GitHub des projets (répétable)")
-    r.add_argument("--sortie", default=".", help="dossier où écrire REGISTRE.md, CARTES.md et registre.json")
+    r.add_argument("--sortie", default=".", help="dossier où écrire REGISTRE.md, CARTES.md, registre.json et ACCUEIL.md")
     args = p.parse_args()
     return {"verifier": verifier, "index": index, "init": init, "carte": nouvelle_carte, "registre": construire_registre}[args.commande](args)
 

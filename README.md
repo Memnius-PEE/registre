@@ -17,6 +17,7 @@ ce qui était auparavant dans deux dépôts (`regles` et l'ancien `registre`, d�
 | [`outils/gardes.py`](outils/gardes.py) | gardes A2 à A7 (CI et pre-commit) |
 | [`modeles/cartes/`](modeles/cartes/) | modèle de chaque type de carte : décision, code, données, sources |
 | [`modeles/projet/`](modeles/projet/) | fichiers exigés d'un projet, créés par `memnius.py init` |
+| [`modeles/accueil.md`](modeles/accueil.md) | partie fixe de la page d'accueil de l'organisation |
 | [`tests/`](tests/) | chaque garde testée dans les deux sens, et l'outil |
 | [`decisions/`](decisions/) | journal des décisions du socle |
 | `.github/workflows/gardes.yml` | workflow réutilisable appelé par chaque projet |
@@ -47,7 +48,12 @@ de chaque dépôt de l'organisation qui porte le topic **`memnius-projet`**, et 
 - `REGISTRE.md` : un tableau des projets (statut, domaines, mainteneur·ices, nombre de cartes par type,
   conformité), chaque projet renvoyant vers son dépôt et son index ;
 - `CARTES.md` : toutes les cartes de tous les projets, par type, puis qui a fait quoi, personne par personne ;
-- `registre.json` : la même chose pour les machines.
+- `registre.json` : la même chose pour les machines ;
+- `ACCUEIL.md` : la page d'accueil de l'organisation, que le workflow copie aussi dans le dépôt `.github`
+  (`profile/README.md`), où GitHub l'affiche au-dessus de la liste des dépôts (décision 0018). Sa partie
+  fixe (où trouver les règles, les règles fondamentales en bref, « LIRE LE MANUEL ! ») est
+  [`modeles/accueil.md`](modeles/accueil.md) ; la partie « Dernières modifications » liste les dix dernières
+  cartes et décisions ajoutées ou modifiées dans les registres des projets publics.
 
 Ces fichiers sont générés : on ne les édite jamais à la main. En local :
 `GITHUB_TOKEN=… python3 outils/memnius.py registre --github Memnius-PEE --sortie /tmp/sortie`.

@@ -163,7 +163,9 @@ class Index(DepotDeTest):
         self.assertEqual(lancer("index", str(self.d), "--verifier")[0], 0)
 
 
-class SuperRegistre(unittest.TestCase):
+class ProjetsDeTest(unittest.TestCase):
+    """Deux projets, alpha et beta, avec leur index, dans un dossier de clones (super-registre en mode local)."""
+
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.racine = Path(self._tmp.name) / "projets"
@@ -187,6 +189,8 @@ class SuperRegistre(unittest.TestCase):
     def tearDown(self):
         self._tmp.cleanup()
 
+
+class SuperRegistre(ProjetsDeTest):
     def test_vue_generale(self):
         code, sortie = lancer("registre", "--local", str(self.racine), "--sortie", str(self.sortie))
         self.assertEqual(code, 0, sortie)
@@ -216,3 +220,87 @@ class SuperRegistre(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Accueil(ProjetsDeTest):
+    """Page d'accueil de l'organisation (profile/README.md du dépôt .github) : partie fixe et dernières modifications."""
+
+    def commit(self, nom, message, auteur="Pwouette", courriel="pwouette@example.org", date="2026-10-10T12:00:00+00:00"):
+        d = self.racine / nom
+        sh(d, "git", "add", "-A")
+        sh(d, "git", "-c", f"user.name={auteur}", "-c", f"user.email={courriel}", "commit", "-q", "-m", message,
+           f"--date={date}")
+
+    def accueil(self):
+        code, sortie = lancer("registre", "--local", str(self.racine), "--sortie", str(self.sortie))
+        self.assertEqual(code, 0, sortie)
+        return (self.sortie / "ACCUEIL.md").read_text(encoding="utf-8")
+
+    def test_partie_fixe(self):
+        texte = self.accueil()
+        self.assertIn("LIRE LE MANUEL !", texte)
+        self.assertIn("REGLES.md", texte)
+        self.assertIn("## Dernières modifications", texte)
+        self.assertNotIn("{{", texte)
+
+    def test_sans_historique(self):
+        self.assertIn("Aucune carte ni décision", self.accueil())
+
+    def test_dernieres_modifications(self):
+        self.commit("alpha", "Création", date="2026-10-01T09:00:00+02:00")
+        self.commit("beta", "Création", auteur="autre-personne", date="2026-10-03T09:00:00+00:00")
+        (self.racine / "alpha/registre/code/calcul.md").write_text(CARTE + "\nPrécision.\n", encoding="utf-8")
+        self.commit("alpha", "Carte précisée", date="2026-10-05T09:00:00+00:00")
+        (self.racine / "alpha/registre/INDEX.md").write_text("# Index régénéré\n", encoding="utf-8")
+        self.commit("alpha", "Index régénéré par la CI", auteur="github-actions[bot]",
+                    courriel="41898282+github-actions[bot]@users.noreply.github.com", date="2026-10-06T09:00:00+00:00")
+        texte = self.accueil()
+        tableau = [l for l in texte.splitlines() if l.startswith("| 2026-")]
+        self.assertTrue(tableau[0].startswith("| 2026-10-05 | alpha |"), tableau[0])
+        self.assertIn("| modifiée | @Pwouette |", tableau[0])
+        self.assertTrue(tableau[1].startswith("| 2026-10-03 | beta |"), tableau[1])
+        self.assertIn("| ajoutée | @autre-personne |", tableau[1])
+        self.assertEqual(len(tableau), 5)  # alpha : carte et décision ajoutées, puis carte modifiée ; beta : deux ajouts
+        self.assertNotIn("Index régénéré", texte)  # l'index n'est pas une carte, et les robots sont ignorés
+        self.assertNotIn("[bot]", texte)
+
+    def test_projet_prive_absent(self):
+        fiche = self.racine / "beta/memnius.yaml"
+        fiche.write_text(fiche.read_text(encoding="utf-8").replace("visibilite: public", "visibilite: prive"), encoding="utf-8")
+        self.commit("alpha", "Création")
+        self.commit("beta", "Création", auteur="secret-beta")
+        texte = self.accueil()
+        self.assertIn("| alpha |", texte)
+        self.assertNotIn("beta", texte)
+
+    def test_limite_a_dix(self):
+        self.commit("alpha", "Création", date="2026-10-01T09:00:00+00:00")
+        for i in range(12):
+            (self.racine / f"alpha/registre/sources/s{i}.md").write_text(CARTE.replace("travaux/calcul.py", "README.md"), encoding="utf-8")
+            self.commit("alpha", f"Source {i}", date=f"2026-10-02T{10 + i}:00:00+00:00")
+        tableau = [l for l in self.accueil().splitlines() if l.startswith("| 2026-")]
+        self.assertEqual(len(tableau), 10)
+        self.assertIn("`s11`", tableau[0])  # cartes absentes de l'index (non régénéré) : nom et lien vers le commit
+
+    def test_lecture_par_l_api_github(self):
+        class FauxGitHub:
+            def get(self, chemin, **params):
+                if chemin.endswith("/commits"):
+                    self.params = params
+                    return [
+                        {"sha": "c3", "parents": [{}], "author": {"login": "github-actions[bot]", "type": "Bot"},
+                         "commit": {"author": {"name": "github-actions[bot]", "date": "2026-10-03T00:00:00Z"}}},
+                        {"sha": "c2", "parents": [{}, {}], "author": {"login": "Pwouette", "type": "User"},
+                         "commit": {"author": {"name": "Romain", "date": "2026-10-02T00:00:00Z"}}},
+                        {"sha": "c1", "parents": [{}], "author": None,
+                         "commit": {"author": {"name": "Sans Compte", "date": "2026-10-01T00:00:00Z"}}},
+                    ], {}
+                assert chemin.endswith("/commits/c1"), chemin  # robot et fusion ignorés sans être lus
+                return {"files": [{"filename": "registre/code/calcul.md", "status": "added"},
+                                  {"filename": "registre/INDEX.md", "status": "modified"},
+                                  {"filename": "registre/decisions/0002-x.md", "status": "removed"}]}, {}
+        gh = FauxGitHub()
+        modifs = memnius.modifications_github(gh, "org/alpha", "main")
+        self.assertEqual(gh.params["path"], "registre")
+        self.assertEqual([(m["fichier"], m["statut"], m["auteur"]) for m in modifs],
+                         [("registre/code/calcul.md", "ajoutée", "Sans Compte"), ("registre/decisions/0002-x.md", "supprimée", "Sans Compte")])
