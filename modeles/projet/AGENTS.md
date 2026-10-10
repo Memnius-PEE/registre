@@ -8,7 +8,7 @@ Gemini CLI, Aider…). Il applique le socle commun du groupe, dont le texte de r
 
 1. Lis `PASSATION.md`, puis vérifie-le au lieu de le croire : re-mesure l'état (dernier commit,
    arbre propre, gardes) et signale tout écart avant d'aller plus loin.
-2. Lis `memnius.yaml` (projet, langue, politique agents, niveau du socle) et les décisions de `decisions/`.
+2. Lis `memnius.yaml` (projet, langue, politique agents, niveau du socle) et les décisions de `registre/decisions/`.
    Ne remets pas une décision en cause sans le signaler.
 3. Lis `registre/INDEX.md` : ce que contient le projet, qui l'a fait, où le trouver.
 4. Présente en deux ou trois phrases l'état du dépôt tel que tu le comprends.
@@ -16,7 +16,7 @@ Gemini CLI, Aider…). Il applique le socle commun du groupe, dont le texte de r
 ## Règles du socle (C1–C11)
 
 - **C1 Histoire en ajout seul** : jamais de force-push, rebase ni amend d'un commit publié sur `main` ; une erreur se corrige par un nouveau commit.
-- **C2 Décision écrite** : toute décision qui engage le dépôt est une nouvelle entrée de `decisions/` ; une entrée publiée n'est jamais modifiée.
+- **C2 Décision écrite** : toute décision qui engage le dépôt est une nouvelle entrée de `registre/decisions/` ; une entrée publiée n'est jamais modifiée.
 - **C3 Les règles appartiennent aux mainteneurs** : tu proposes, par une pull request ; seuls les mainteneurs déclarés changent une règle.
 - **C4 Origine marquée** : dans le journal, `[humain]` pour les mots tapés par une personne, `[choix]` pour ton option choisie par une personne, `[agent]` pour ta déduction. Chaque commit se termine par `Assisted-by: <outil> (<modèle>)`.
 - **C5 Source ou « non vérifié »** : tout chiffre ou fait porte sa source (fichier, commande et sortie, référence de `sources/`) ou la mention `[non vérifié]`.
@@ -34,7 +34,7 @@ Si `socle.niveau` vaut `recommande` ou `renforce`, les règles R1–R8 (et les o
 
 | Tu peux modifier | Avec prudence | Ne modifie jamais |
 |---|---|---|
-| le contenu du projet, les cartes de `registre/` | `memnius.yaml`, `README.md`, `PASSATION.md` | entrées existantes de `decisions/`, données d'origine, `.github/`, `AGENTS.md`, `registre/INDEX.md` et `registre/index.json` à la main |
+| le contenu du projet, les cartes de `registre/` | `memnius.yaml`, `README.md`, `PASSATION.md` | entrées existantes de `registre/decisions/`, données d'origine, `.github/`, `AGENTS.md`, `registre/INDEX.md` et `registre/index.json` à la main |
 
 ## Façon de travailler
 
@@ -52,8 +52,9 @@ Le format des cartes est décrit dans `registre/README.md`. Quand tu ajoutes ou 
 1. crée ou mets à jour sa carte à partir du modèle (`memnius.py carte TYPE NOM --ou CHEMIN --auteur LOGIN`),
    avec comme auteur la personne qui t'a lancé, et `statut: a-relire` ;
 2. une décision s'écrit dans le journal, elle aussi à partir du modèle (`memnius.py carte decision titre-court`) :
-   l'entrée de `decisions/` est sa carte ;
-3. régénère l'index (`memnius.py index`) et commite-le avec le changement : la garde A7 refuse un index périmé.
+   l'entrée de `registre/decisions/` est sa carte ;
+3. régénère l'index et les liens des cartes (`memnius.py index`) et commite-les avec le changement : la garde A7
+   refuse un index ou un bloc de liens périmé.
 
 ## Commandes utiles
 

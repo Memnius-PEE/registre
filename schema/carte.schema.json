@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "En-tête d'une carte du registre d'un projet (registre/<type>/<nom>.md)",
-  "description": "Le type de la carte (code, donnees, sources) vient du dossier où elle est rangée. Les cartes de décision sont les entrées du journal decisions/, lues telles quelles.",
+  "description": "Le type de la carte (code, donnees, sources) vient du dossier où elle est rangée. Les cartes de décision sont les entrées du journal registre/decisions/, lues telles quelles.",
   "type": "object",
   "required": ["titre", "resume", "ou", "auteurs", "date"],
   "additionalProperties": false,

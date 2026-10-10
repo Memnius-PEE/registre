@@ -124,7 +124,8 @@ def garde_a3(dossier, **_):
 
 # ------------------------------------------------------------------ A4 journal
 
-NOM_ENTREE = re.compile(r"^decisions/(\d{4})(-[a-z0-9]+(?:-[a-z0-9]+)*)?\.md$")
+JOURNAL = "registre/decisions/"
+NOM_ENTREE = re.compile(r"^registre/decisions/(\d{4})(-[a-z0-9]+(?:-[a-z0-9]+)*)?\.md$")
 CHAMP = re.compile(r"^-\s*\**(Date|Origine|Décidé par)\**\s*:\s*(.*)$", re.M)
 MARQUEUR = re.compile(r"\[(humain|choix|agent)\]")
 RESTES_GABARIT = re.compile(r"AAAA-MM-JJ|NNNN|À_REMPLIR|IDENTIFIANT")
@@ -154,11 +155,14 @@ def garde_a4(dossier, fichiers, base=None, **_):
     defauts, numeros = [], {}
     entrees = []
     for f in fichiers:
-        if not f.startswith("decisions/") or f in ("decisions/README.md", "decisions/.gitkeep"):
+        if f.startswith("decisions/") and f != "decisions/README.md":
+            defauts.append(f"{f} : le journal vit dans {JOURNAL} (git mv decisions registre/decisions)")
+            continue
+        if not f.startswith(JOURNAL) or f in (JOURNAL + "README.md", JOURNAL + ".gitkeep"):
             continue
         m = NOM_ENTREE.match(f)
         if not m:
-            defauts.append(f"{f} : nom attendu decisions/NNNN.md ou decisions/NNNN-titre-court.md")
+            defauts.append(f"{f} : nom attendu {JOURNAL}NNNN.md ou {JOURNAL}NNNN-titre-court.md")
             continue
         if m.group(1) in numeros:
             defauts.append(f"{f} : numéro {m.group(1)} déjà pris par {numeros[m.group(1)]}")
@@ -166,10 +170,10 @@ def garde_a4(dossier, fichiers, base=None, **_):
         entrees.append(f)
         defauts += controler_entree(f, (dossier / f).read_text(encoding="utf-8", errors="replace"))
     if not entrees:
-        defauts.append("aucune entrée dans decisions/ (au moins l'adoption du socle)")
+        defauts.append(f"aucune entrée dans {JOURNAL} (au moins l'adoption du socle)")
     portee = "format seul, pas de commit de référence"
     if base and set(base) != {"0"}:
-        sortie = git(dossier, "diff", "--name-status", "-M", base, "HEAD", "--", "decisions/").decode()
+        sortie = git(dossier, "diff", "--name-status", "-M", base, "HEAD", "--", JOURNAL).decode()
         for ligne in sortie.splitlines():
             etat, *chemins = ligne.split("\t")
             ancien = chemins[0]
@@ -186,7 +190,7 @@ def garde_a4(dossier, fichiers, base=None, **_):
 
 # ------------------------------------------------------------------ A5 renvois
 
-FICHIERS_GOUVERNANCE = re.compile(r"^(README\.md|registre/README\.md|AGENTS\.md|CLAUDE\.md|CONTRIBUTING\.md|PASSATION\.md|REGLES\.md|decisions/[^/]+\.md)$")
+FICHIERS_GOUVERNANCE = re.compile(r"^(README\.md|registre/README\.md|AGENTS\.md|CLAUDE\.md|CONTRIBUTING\.md|PASSATION\.md|REGLES\.md|registre/decisions/[^/]+\.md)$")
 RENVOI = re.compile(r"(?<![\w/.#@-])([CROA])(\d{1,2})(?![\w])")
 
 
