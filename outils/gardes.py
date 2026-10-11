@@ -37,6 +37,10 @@ def git(dossier, *args):
 
 
 def est_depot_git(dossier):
+    """Vrai seulement à la racine d'un dépôt Git : un projet préparé dans le dossier d'un autre dépôt
+    (projets/<nom>/ du kit, pas encore « git init ») est lu comme un simple dossier."""
+    if not (Path(dossier) / ".git").exists():
+        return False
     try:
         return git(dossier, "rev-parse", "--is-inside-work-tree").strip() == b"true"
     except (RuntimeError, FileNotFoundError):

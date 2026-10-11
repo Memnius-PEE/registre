@@ -95,7 +95,7 @@ class Init(unittest.TestCase):
         self.assertIn("- github: quelqu-un", fiche)
         self.assertIn("@quelqu-un", (self.d / "registre/decisions/0001-adopter-le-socle.md").read_text(encoding="utf-8"))
         self.assertFalse((self.d / "PASSATION.md").exists())
-        for f in ("AGENTS.md", "registre/README.md", "registre/INDEX.md", ".github/workflows/memnius.yml"):
+        for f in ("AGENTS.md", "CONTRIBUTING.md", "registre/README.md", "registre/INDEX.md", ".github/workflows/memnius.yml"):
             self.assertTrue((self.d / f).exists(), f)
         self.assertNotIn("{{", "".join(p.read_text(encoding="utf-8") for p in self.d.rglob("*.md")))
 
@@ -108,6 +108,16 @@ class Init(unittest.TestCase):
         self.assertIn("[ ok ] A4", sortie)
         self.assertIn("[ ok ] A7", sortie)
         self.assertIn("sans carte : travaux/calcul.py", sortie)
+
+    def test_projet_neuf_range_dans_un_autre_depot(self):
+        # Préparé dans un dossier d'un autre dépôt Git (projets/<nom>/ du kit), pas encore « git init » :
+        # les gardes le lisent comme un simple dossier, sans conclure qu'il n'a aucun fichier.
+        neuf = self.d / "projets" / "neuf"
+        neuf.mkdir(parents=True)
+        lancer("init", str(neuf), "--titre", "Neuf", "--mainteneur", "quelqu-un")
+        code, sortie = lancer_gardes(neuf, "A4")
+        self.assertEqual(code, 0, sortie)
+        self.assertIn("[ ok ] A4", sortie)
 
     def test_journal_existant_garde(self):
         (self.d / "registre/decisions").mkdir(parents=True)
