@@ -5,10 +5,9 @@ on:
   pull_request:
   push:
     branches: [main]
-  workflow_dispatch:   # relance après le commit de l'index du registre par la CI (règle C11)
 permissions:
-  contents: write      # la CI commite l'index du registre sur la branche de la pull request
-  actions: write       # puis relance ce workflow sur ce commit
+  contents: read       # la CI commite l'index du registre avec la clé de déploiement du projet (secret MEMNIUS_INDEX_CLE)
 jobs:
   gardes:
     uses: Memnius-PEE/registre/.github/workflows/gardes.yml@v2
+    secrets: inherit
