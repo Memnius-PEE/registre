@@ -1,6 +1,6 @@
 # Registre des projets Memnius
 
-_Généré le 2026-10-11T00:12:47+00:00 depuis `https://github.com/Memnius-PEE`. Ne pas éditer : chaque projet tient sa fiche (`memnius.yaml`) et son registre (`registre/`). Toutes les cartes : [CARTES.md](CARTES.md)._
+_Généré le 2026-10-11T09:00:31+00:00 depuis `https://github.com/Memnius-PEE`. Ne pas éditer : chaque projet tient sa fiche (`memnius.yaml`) et son registre (`registre/`). Toutes les cartes : [CARTES.md](CARTES.md)._
 
 | Projet | Statut | Domaines | Mainteneur·ices | Décisions | Code | Données | Sources | Socle | Dernière activité | Conformité |
 |---|---|---|---|---|---|---|---|---|---|---|
