@@ -45,6 +45,9 @@ langue de la personne qui lui parle (C10).
 
 | Date | Projet | Carte | Type | Changement | Par |
 |---|---|---|---|---|---|
+| 2026-10-11 | optique-ondulatoire | [0006 — L'index est poussé par la clé de déploiement du projet](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0006-index-pousse-par-cle.md) | décision | ajoutée | Romain Caldani |
+| 2026-10-11 | horloge-hello | [Page horloge et Hello world](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md) | code | modifiée | Romain Caldani |
+| 2026-10-11 | horloge-hello | [0003 — Publier la page avec GitHub Pages](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0003-publier-avec-github-pages.md) | décision | ajoutée | Romain Caldani |
 | 2026-10-10 | horloge-hello | [Page horloge et Hello world](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md) | code | ajoutée | Romain Caldani |
 | 2026-10-10 | horloge-hello | [0002 — Page statique sans dépendance](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0002-page-statique-sans-dependance.md) | décision | ajoutée | Romain Caldani |
 | 2026-10-10 | horloge-hello | [0001 — Adopter le socle commun Memnius v2](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0001-adopter-le-socle.md) | décision | ajoutée | Romain Caldani |
@@ -52,8 +55,5 @@ langue de la personne qui lui parle (C10).
 | 2026-10-10 | optique-ondulatoire | [0005 — Suivre le socle v2 révisé](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0005-socle-v2-revise.md) | décision | ajoutée | Romain Caldani |
 | 2026-10-10 | optique-ondulatoire | [Calcul de l'interfrange des fentes d'Young](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) | code | modifiée | Romain Caldani |
 | 2026-10-10 | optique-ondulatoire | [0001 — Adopter le socle commun Memnius v1](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0001-adopter-le-socle.md) | décision | renommée | Romain Caldani |
-| 2026-10-10 | optique-ondulatoire | [0002 — Calculs en Python sans dépendance](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0002-calculs-sans-dependance.md) | décision | renommée | Romain Caldani |
-| 2026-10-10 | optique-ondulatoire | [0003 — Passer au socle v2 et tenir le registre du projet](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0003-passer-au-socle-v2.md) | décision | renommée | Romain Caldani |
-| 2026-10-10 | optique-ondulatoire | [0004 — Ranger le journal des décisions dans le registre](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0004-decisions-dans-le-registre.md) | décision | ajoutée | Romain Caldani |
 
 _Les 10 dernières cartes et décisions ajoutées ou modifiées dans les registres des projets publics, d'après leur historique Git. Toutes les cartes : [`CARTES.md`](https://github.com/Memnius-PEE/registre/blob/super-registre/CARTES.md)._

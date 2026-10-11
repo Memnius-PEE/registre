@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/2",
-  "genere_le": "2026-10-10T23:54:34+00:00",
+  "genere_le": "2026-10-11T00:12:47+00:00",
   "source": "https://github.com/Memnius-PEE",
   "projets": [
     {
@@ -60,8 +60,8 @@
         "chemin": "Memnius-PEE/optique-ondulatoire",
         "url": "https://github.com/Memnius-PEE/optique-ondulatoire",
         "branche": "main",
-        "dernier_commit": "3a7241c2acbdcc4480a53bbb58ad6d88f5af085a",
-        "derniere_activite": "2026-10-10T22:42:40Z",
+        "dernier_commit": "a213684437a37d6d3d1c1764c14ba8f32ae23d2e",
+        "derniere_activite": "2026-10-11T00:12:22Z",
         "archive_forge": false,
         "prive": false,
         "etoiles": 0,
@@ -78,7 +78,7 @@
         "projet": "optique-ondulatoire",
         "titre": "Optique ondulatoire",
         "comptes": {
-          "decision": 5,
+          "decision": 6,
           "code": 1,
           "donnees": 0,
           "sources": 2
@@ -176,6 +176,24 @@
             "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0005-socle-v2-revise.md"
           },
           {
+            "type": "decision",
+            "id": "decisions/0006",
+            "fichier": "registre/decisions/0006-index-pousse-par-cle.md",
+            "titre": "0006 — L'index est poussé par la clé de déploiement du projet",
+            "resume": "La CI commite l'index du registre avec la clé de déploiement du projet (secret `MEMNIUS_INDEX_CLE`), ce qui relance normalement les gardes sur la pull request. Le workflow `memnius.yml` n'a plus besoin que du droit `contents: read` et transmet ses secrets au workflow commun (`secrets: inherit`) ; l…",
+            "ou": [
+              "registre/decisions/0006-index-pousse-par-cle.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-10-11",
+            "origine": [
+              "humain"
+            ],
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0006-index-pousse-par-cle.md"
+          },
+          {
             "type": "code",
             "id": "code/interfrange",
             "fichier": "registre/code/interfrange.md",
@@ -241,6 +259,13 @@
       },
       "modifications": [
         {
+          "sha": "c0d2893dc2e414ed1d60f64b13004c81e398f094",
+          "date": "2026-10-11T00:11:43Z",
+          "auteur": "Romain Caldani",
+          "statut": "ajoutée",
+          "fichier": "registre/decisions/0006-index-pousse-par-cle.md"
+        },
+        {
           "sha": "626004d9a162f9d201008931a68d4bfb267c889f",
           "date": "2026-10-10T22:34:47Z",
           "auteur": "Romain Caldani",
@@ -302,13 +327,6 @@
           "auteur": "Romain Caldani",
           "statut": "modifiée",
           "fichier": "registre/sources/wikiversite-optique.md"
-        },
-        {
-          "sha": "ae9102a74e36c6dbff0f045e78afbb662e451754",
-          "date": "2026-10-10T20:51:56Z",
-          "auteur": "Romain Caldani",
-          "statut": "ajoutée",
-          "fichier": "registre/code/interfrange.md"
         }
       ]
     },
@@ -358,8 +376,8 @@
         "chemin": "Memnius-PEE/horloge-hello",
         "url": "https://github.com/Memnius-PEE/horloge-hello",
         "branche": "main",
-        "dernier_commit": "b9539c83d5913a9d0264a2d755fcaabce6b77c8e",
-        "derniere_activite": "2026-10-10T23:53:48Z",
+        "dernier_commit": "ea01d4e55176cc73a0c34bd0d5c6843e06eece9f",
+        "derniere_activite": "2026-10-11T00:04:06Z",
         "archive_forge": false,
         "prive": false,
         "etoiles": 0,
@@ -367,18 +385,16 @@
         "branche_protegee": true
       },
       "conformite": {
-        "niveau": "avertissements",
+        "niveau": "conforme",
         "erreurs": [],
-        "avertissements": [
-          "fichier recommandé absent : CONTRIBUTING.md"
-        ]
+        "avertissements": []
       },
       "index": {
         "schema": "memnius-index/1",
         "projet": "horloge-hello",
         "titre": "Horloge Hello",
         "comptes": {
-          "decision": 2,
+          "decision": 3,
           "code": 1,
           "donnees": 0,
           "sources": 0
@@ -421,6 +437,24 @@
             "url": "https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0002-page-statique-sans-dependance.md"
           },
           {
+            "type": "decision",
+            "id": "decisions/0003",
+            "fichier": "registre/decisions/0003-publier-avec-github-pages.md",
+            "titre": "0003 — Publier la page avec GitHub Pages",
+            "resume": "Le dossier `site/` est publié sur GitHub Pages par le workflow `.github/workflows/pages.yml`, à chaque fusion dans `main` qui le touche : <https://memnius-pee.github.io/horloge-hello/>. Le projet passe aussi au workflow des gardes de la décision 0019 du socle (index poussé par la clé de déploiement…",
+            "ou": [
+              "registre/decisions/0003-publier-avec-github-pages.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-10-11",
+            "origine": [
+              "choix"
+            ],
+            "url": "https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0003-publier-avec-github-pages.md"
+          },
+          {
             "type": "code",
             "id": "code/page-horloge",
             "fichier": "registre/code/page-horloge.md",
@@ -428,7 +462,8 @@
             "resume": "Page web statique qui affiche l'heure locale, mise à jour chaque seconde, et écrit « Hello world » quand on clique sur le bouton.",
             "ou": [
               "site/index.html",
-              "site/horloge.js"
+              "site/horloge.js",
+              "https://memnius-pee.github.io/horloge-hello/"
             ],
             "auteurs": [
               "Pwouette"
@@ -446,6 +481,20 @@
         ]
       },
       "modifications": [
+        {
+          "sha": "fb6037693302da1600ad6ca589f0de97a22d914f",
+          "date": "2026-10-11T00:01:18Z",
+          "auteur": "Romain Caldani",
+          "statut": "modifiée",
+          "fichier": "registre/code/page-horloge.md"
+        },
+        {
+          "sha": "fb6037693302da1600ad6ca589f0de97a22d914f",
+          "date": "2026-10-11T00:01:18Z",
+          "auteur": "Romain Caldani",
+          "statut": "ajoutée",
+          "fichier": "registre/decisions/0003-publier-avec-github-pages.md"
+        },
         {
           "sha": "b3ca1152feb6dc356fdcad44f7991004dc344764",
           "date": "2026-10-10T23:50:23Z",
