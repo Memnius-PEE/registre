@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/2",
-  "genere_le": "2026-10-12T09:21:54+00:00",
+  "genere_le": "2026-10-12T17:07:56+00:00",
   "source": "https://github.com/Memnius-PEE",
   "projets": [
     {
@@ -66,11 +66,13 @@
         "prive": false,
         "etoiles": 0,
         "tickets_ouverts": 0,
-        "branche_protegee": true
+        "branche_protegee": false
       },
       "conformite": {
-        "niveau": "conforme",
-        "erreurs": [],
+        "niveau": "non-conforme",
+        "erreurs": [
+          "A1 : ruleset de la branche principale incomplet : contrôle « gardes / A2, second filet (gitleaks) » non exigé (relancer publier-projet.sh NOM --regler)"
+        ],
         "avertissements": []
       },
       "index": {
@@ -261,70 +263,80 @@
         {
           "sha": "c0d2893dc2e414ed1d60f64b13004c81e398f094",
           "date": "2026-10-11T00:11:43Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "ajoutée",
           "fichier": "registre/decisions/0006-index-pousse-par-cle.md"
         },
         {
           "sha": "626004d9a162f9d201008931a68d4bfb267c889f",
           "date": "2026-10-10T22:34:47Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "modifiée",
           "fichier": "registre/code/interfrange.md"
         },
         {
           "sha": "626004d9a162f9d201008931a68d4bfb267c889f",
           "date": "2026-10-10T22:34:47Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "ajoutée",
           "fichier": "registre/decisions/0005-socle-v2-revise.md"
         },
         {
           "sha": "63b7f5198fff1331c68d84ba765670e0d733da77",
           "date": "2026-10-10T21:32:54Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "modifiée",
           "fichier": "registre/code/interfrange.md"
         },
         {
           "sha": "63b7f5198fff1331c68d84ba765670e0d733da77",
           "date": "2026-10-10T21:32:54Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "renommée",
           "fichier": "registre/decisions/0001-adopter-le-socle.md"
         },
         {
           "sha": "63b7f5198fff1331c68d84ba765670e0d733da77",
           "date": "2026-10-10T21:32:54Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "renommée",
           "fichier": "registre/decisions/0002-calculs-sans-dependance.md"
         },
         {
           "sha": "63b7f5198fff1331c68d84ba765670e0d733da77",
           "date": "2026-10-10T21:32:54Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "renommée",
           "fichier": "registre/decisions/0003-passer-au-socle-v2.md"
         },
         {
           "sha": "63b7f5198fff1331c68d84ba765670e0d733da77",
           "date": "2026-10-10T21:32:54Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "ajoutée",
           "fichier": "registre/decisions/0004-decisions-dans-le-registre.md"
         },
         {
           "sha": "63b7f5198fff1331c68d84ba765670e0d733da77",
           "date": "2026-10-10T21:32:54Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "modifiée",
           "fichier": "registre/sources/hecht-optics.md"
         },
         {
           "sha": "63b7f5198fff1331c68d84ba765670e0d733da77",
           "date": "2026-10-10T21:32:54Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "modifiée",
           "fichier": "registre/sources/wikiversite-optique.md"
         }
@@ -382,11 +394,13 @@
         "prive": false,
         "etoiles": 0,
         "tickets_ouverts": 0,
-        "branche_protegee": true
+        "branche_protegee": false
       },
       "conformite": {
-        "niveau": "conforme",
-        "erreurs": [],
+        "niveau": "non-conforme",
+        "erreurs": [
+          "A1 : ruleset de la branche principale incomplet : contrôle « gardes / A2, second filet (gitleaks) » non exigé (relancer publier-projet.sh NOM --regler)"
+        ],
         "avertissements": []
       },
       "index": {
@@ -484,35 +498,40 @@
         {
           "sha": "fb6037693302da1600ad6ca589f0de97a22d914f",
           "date": "2026-10-11T00:01:18Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "modifiée",
           "fichier": "registre/code/page-horloge.md"
         },
         {
           "sha": "fb6037693302da1600ad6ca589f0de97a22d914f",
           "date": "2026-10-11T00:01:18Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "ajoutée",
           "fichier": "registre/decisions/0003-publier-avec-github-pages.md"
         },
         {
           "sha": "b3ca1152feb6dc356fdcad44f7991004dc344764",
           "date": "2026-10-10T23:50:23Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "ajoutée",
           "fichier": "registre/code/page-horloge.md"
         },
         {
           "sha": "b3ca1152feb6dc356fdcad44f7991004dc344764",
           "date": "2026-10-10T23:50:23Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "ajoutée",
           "fichier": "registre/decisions/0002-page-statique-sans-dependance.md"
         },
         {
           "sha": "9159fa330ec13ebb12b0b20f5df2dc18b2449d64",
           "date": "2026-10-10T23:49:42Z",
-          "auteur": "Romain Caldani",
+          "auteur": null,
+          "agent": true,
           "statut": "ajoutée",
           "fichier": "registre/decisions/0001-adopter-le-socle.md"
         }

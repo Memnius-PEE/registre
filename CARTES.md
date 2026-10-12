@@ -1,6 +1,6 @@
 # Toutes les cartes des projets Memnius
 
-_Généré le 2026-10-12T09:21:54+00:00 à partir du `registre/index.json` de chaque projet. Ne pas éditer. Vue par projet : [REGISTRE.md](REGISTRE.md)._
+_Généré le 2026-10-12T17:07:56+00:00 à partir du `registre/index.json` de chaque projet. Ne pas éditer. Vue par projet : [REGISTRE.md](REGISTRE.md). Chercher un mot dans toutes les cartes : recherche de code GitHub `org:Memnius-PEE path:registre/ le-mot`._
 
 ## Décisions (9)
 
@@ -18,10 +18,10 @@ _Généré le 2026-10-12T09:21:54+00:00 à partir du `registre/index.json` de ch
 
 ## Code (2)
 
-| Projet | Carte | Résumé | Qui | Où |
-|---|---|---|---|---|
-| horloge-hello | [Page horloge et Hello world](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md) | Page web statique qui affiche l'heure locale, mise à jour chaque seconde, et écrit « Hello world » quand on clique sur le bouton. | @Pwouette | [`site/index.html`](https://github.com/Memnius-PEE/horloge-hello/blob/main/site/index.html), [`site/horloge.js`](https://github.com/Memnius-PEE/horloge-hello/blob/main/site/horloge.js), [memnius-pee.github.io](https://memnius-pee.github.io/horloge-hello/) |
-| optique-ondulatoire | [Calcul de l'interfrange des fentes d'Young](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) | Calcule l'interfrange i = λD/a des fentes d'Young et affiche l'ordre de grandeur pour un pointeur laser rouge. | @Pwouette | [`travaux/interfrange.py`](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/travaux/interfrange.py) |
+| Projet | Carte | Résumé | Qui | Où | Mots-clés |
+|---|---|---|---|---|---|
+| horloge-hello | [Page horloge et Hello world](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md) (à relire) | Page web statique qui affiche l'heure locale, mise à jour chaque seconde, et écrit « Hello world » quand on clique sur le bouton. | @Pwouette | [`site/index.html`](https://github.com/Memnius-PEE/horloge-hello/blob/main/site/index.html), [`site/horloge.js`](https://github.com/Memnius-PEE/horloge-hello/blob/main/site/horloge.js), [memnius-pee.github.io](https://memnius-pee.github.io/horloge-hello/) |  |
+| optique-ondulatoire | [Calcul de l'interfrange des fentes d'Young](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) (à relire) | Calcule l'interfrange i = λD/a des fentes d'Young et affiche l'ordre de grandeur pour un pointeur laser rouge. | @Pwouette | [`travaux/interfrange.py`](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/travaux/interfrange.py) | interferences, fentes-young |
 
 ## Données (0)
 
@@ -29,14 +29,18 @@ _Aucune carte._
 
 ## Sources (2)
 
-| Projet | Carte | Résumé | Qui | Où |
-|---|---|---|---|---|
-| optique-ondulatoire | [Hecht, Optics (5e édition)](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/hecht-optics.md) | Manuel de référence pour l'optique ondulatoire ; le chapitre 9 traite des interférences et des fentes d'Young. | @Pwouette | [`sources/references.bib`](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/sources/references.bib) |
-| optique-ondulatoire | [Cours d'optique ondulatoire (Wikiversité)](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/wikiversite-optique.md) | Cours d'introduction en ligne, libre, utile pour les contributeur·ices qui découvrent le sujet. | @Pwouette | [`sources/liens.md`](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/sources/liens.md), [fr.wikiversity.org](https://fr.wikiversity.org/wiki/Optique_ondulatoire) |
+| Projet | Carte | Résumé | Qui | Où | Mots-clés |
+|---|---|---|---|---|---|
+| optique-ondulatoire | [Hecht, Optics (5e édition)](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/hecht-optics.md) (à relire) | Manuel de référence pour l'optique ondulatoire ; le chapitre 9 traite des interférences et des fentes d'Young. | @Pwouette | [`sources/references.bib`](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/sources/references.bib) |  |
+| optique-ondulatoire | [Cours d'optique ondulatoire (Wikiversité)](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/wikiversite-optique.md) (à relire) | Cours d'introduction en ligne, libre, utile pour les contributeur·ices qui découvrent le sujet. | @Pwouette | [`sources/liens.md`](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/sources/liens.md), [fr.wikiversity.org](https://fr.wikiversity.org/wiki/Optique_ondulatoire) |  |
+
+## Documents (0)
+
+_Aucune carte._
 
 ## Qui a fait quoi
 
-| Personne | Projet | Décisions | Code | Données | Sources |
-|---|---|---|---|---|---|
-| @Pwouette | horloge-hello | [0001](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0001-adopter-le-socle.md), [0002](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0002-page-statique-sans-dependance.md), [0003](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0003-publier-avec-github-pages.md) | [page-horloge](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md) |  |  |
-| @Pwouette | optique-ondulatoire | [0001](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0001-adopter-le-socle.md), [0002](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0002-calculs-sans-dependance.md), [0003](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0003-passer-au-socle-v2.md), [0004](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0004-decisions-dans-le-registre.md), [0005](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0005-socle-v2-revise.md), [0006](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0006-index-pousse-par-cle.md) | [interfrange](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) |  | [hecht-optics](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/hecht-optics.md), [wikiversite-optique](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/wikiversite-optique.md) |
+| Personne | Projet | Décisions | Code | Données | Sources | Documents |
+|---|---|---|---|---|---|---|
+| @Pwouette | horloge-hello | [0001](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0001-adopter-le-socle.md), [0002](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0002-page-statique-sans-dependance.md), [0003](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0003-publier-avec-github-pages.md) | [page-horloge](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md) |  |  |  |
+| @Pwouette | optique-ondulatoire | [0001](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0001-adopter-le-socle.md), [0002](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0002-calculs-sans-dependance.md), [0003](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0003-passer-au-socle-v2.md), [0004](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0004-decisions-dans-le-registre.md), [0005](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0005-socle-v2-revise.md), [0006](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0006-index-pousse-par-cle.md) | [interfrange](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) |  | [hecht-optics](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/hecht-optics.md), [wikiversite-optique](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/wikiversite-optique.md) |  |
