@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/2",
-  "genere_le": "2026-10-12T17:07:56+00:00",
+  "genere_le": "2026-10-12T17:12:45+00:00",
   "source": "https://github.com/Memnius-PEE",
   "projets": [
     {
@@ -60,19 +60,17 @@
         "chemin": "Memnius-PEE/optique-ondulatoire",
         "url": "https://github.com/Memnius-PEE/optique-ondulatoire",
         "branche": "main",
-        "dernier_commit": "a213684437a37d6d3d1c1764c14ba8f32ae23d2e",
-        "derniere_activite": "2026-10-11T10:15:18Z",
+        "dernier_commit": "191e186e4595ab348bf623915336c7e8af207ab3",
+        "derniere_activite": "2026-10-12T17:09:59Z",
         "archive_forge": false,
         "prive": false,
         "etoiles": 0,
         "tickets_ouverts": 0,
-        "branche_protegee": false
+        "branche_protegee": true
       },
       "conformite": {
-        "niveau": "non-conforme",
-        "erreurs": [
-          "A1 : ruleset de la branche principale incomplet : contrôle « gardes / A2, second filet (gitleaks) » non exigé (relancer publier-projet.sh NOM --regler)"
-        ],
+        "niveau": "conforme",
+        "erreurs": [],
         "avertissements": []
       },
       "index": {
@@ -83,7 +81,8 @@
           "decision": 6,
           "code": 1,
           "donnees": 0,
-          "sources": 2
+          "sources": 2,
+          "documents": 1
         },
         "cartes": [
           {
@@ -101,6 +100,9 @@
             "date": "2026-09-26",
             "origine": [
               "humain"
+            ],
+            "remplacee_par": [
+              "0003"
             ],
             "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0001-adopter-le-socle.md"
           },
@@ -256,10 +258,43 @@
             "licence": "CC-BY-SA",
             "statut": "a-relire",
             "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/sources/wikiversite-optique.md"
+          },
+          {
+            "type": "documents",
+            "id": "documents/fentes-young",
+            "fichier": "registre/documents/fentes-young.md",
+            "titre": "Note sur les fentes d'Young",
+            "resume": "Rappelle le montage des fentes d'Young et la formule de l'interfrange i = λD/a, avec un ordre de grandeur pour un pointeur laser rouge.",
+            "ou": [
+              "notes/fentes-young.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-09-26",
+            "format": "note",
+            "liens": [
+              "code/interfrange",
+              "sources/hecht-optics"
+            ],
+            "mots_cles": [
+              "interferences",
+              "fentes-young"
+            ],
+            "statut": "a-relire",
+            "url": "https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/documents/fentes-young.md"
           }
         ]
       },
       "modifications": [
+        {
+          "sha": "4542ac929ed18f37147073cdaa335ec32274370f",
+          "date": "2026-10-12T17:05:12Z",
+          "auteur": null,
+          "agent": true,
+          "statut": "ajoutée",
+          "fichier": "registre/documents/fentes-young.md"
+        },
         {
           "sha": "c0d2893dc2e414ed1d60f64b13004c81e398f094",
           "date": "2026-10-11T00:11:43Z",
@@ -331,14 +366,6 @@
           "agent": true,
           "statut": "modifiée",
           "fichier": "registre/sources/hecht-optics.md"
-        },
-        {
-          "sha": "63b7f5198fff1331c68d84ba765670e0d733da77",
-          "date": "2026-10-10T21:32:54Z",
-          "auteur": null,
-          "agent": true,
-          "statut": "modifiée",
-          "fichier": "registre/sources/wikiversite-optique.md"
         }
       ]
     },
@@ -388,19 +415,17 @@
         "chemin": "Memnius-PEE/horloge-hello",
         "url": "https://github.com/Memnius-PEE/horloge-hello",
         "branche": "main",
-        "dernier_commit": "ea01d4e55176cc73a0c34bd0d5c6843e06eece9f",
-        "derniere_activite": "2026-10-11T10:15:01Z",
+        "dernier_commit": "58d1d3bdaf47cdc035d10f76a7ce618f2f59e910",
+        "derniere_activite": "2026-10-12T17:10:02Z",
         "archive_forge": false,
         "prive": false,
         "etoiles": 0,
         "tickets_ouverts": 0,
-        "branche_protegee": false
+        "branche_protegee": true
       },
       "conformite": {
-        "niveau": "non-conforme",
-        "erreurs": [
-          "A1 : ruleset de la branche principale incomplet : contrôle « gardes / A2, second filet (gitleaks) » non exigé (relancer publier-projet.sh NOM --regler)"
-        ],
+        "niveau": "conforme",
+        "erreurs": [],
         "avertissements": []
       },
       "index": {
@@ -411,7 +436,8 @@
           "decision": 3,
           "code": 1,
           "donnees": 0,
-          "sources": 0
+          "sources": 0,
+          "documents": 1
         },
         "cartes": [
           {
@@ -491,10 +517,39 @@
             "mots_cles": [],
             "statut": "a-relire",
             "url": "https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md"
+          },
+          {
+            "type": "documents",
+            "id": "documents/mode-d-emploi",
+            "fichier": "registre/documents/mode-d-emploi.md",
+            "titre": "Mode d'emploi de la page",
+            "resume": "Explique en trois étapes comment ouvrir la page et ce qu'elle fait, pour quelqu'un qui découvre le projet.",
+            "ou": [
+              "docs/mode-d-emploi.md"
+            ],
+            "auteurs": [
+              "Pwouette"
+            ],
+            "date": "2026-10-12",
+            "format": "note",
+            "liens": [
+              "code/page-horloge"
+            ],
+            "mots_cles": [],
+            "statut": "a-relire",
+            "url": "https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/documents/mode-d-emploi.md"
           }
         ]
       },
       "modifications": [
+        {
+          "sha": "0faf429a675344e718bf68cfec9b0f0241f7f1ba",
+          "date": "2026-10-12T17:05:34Z",
+          "auteur": null,
+          "agent": true,
+          "statut": "ajoutée",
+          "fichier": "registre/documents/mode-d-emploi.md"
+        },
         {
           "sha": "fb6037693302da1600ad6ca589f0de97a22d914f",
           "date": "2026-10-11T00:01:18Z",

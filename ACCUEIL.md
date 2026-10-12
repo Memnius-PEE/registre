@@ -47,6 +47,8 @@ langue de la personne qui lui parle (C10).
 
 | Date | Projet | Carte | Type | Changement | Par |
 |---|---|---|---|---|---|
+| 2026-10-12 | horloge-hello | [Mode d'emploi de la page](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/documents/mode-d-emploi.md) | document | ajoutée | — 🤖 |
+| 2026-10-12 | optique-ondulatoire | [Note sur les fentes d'Young](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/documents/fentes-young.md) | document | ajoutée | — 🤖 |
 | 2026-10-11 | optique-ondulatoire | [0006 — L'index est poussé par la clé de déploiement du projet](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0006-index-pousse-par-cle.md) | décision | ajoutée | — 🤖 |
 | 2026-10-11 | horloge-hello | [Page horloge et Hello world](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/code/page-horloge.md) | code | modifiée | — 🤖 |
 | 2026-10-11 | horloge-hello | [0003 — Publier la page avec GitHub Pages](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0003-publier-avec-github-pages.md) | décision | ajoutée | — 🤖 |
@@ -55,7 +57,5 @@ langue de la personne qui lui parle (C10).
 | 2026-10-10 | horloge-hello | [0001 — Adopter le socle commun Memnius v2](https://github.com/Memnius-PEE/horloge-hello/blob/main/registre/decisions/0001-adopter-le-socle.md) | décision | ajoutée | — 🤖 |
 | 2026-10-10 | optique-ondulatoire | [Calcul de l'interfrange des fentes d'Young](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) | code | modifiée | — 🤖 |
 | 2026-10-10 | optique-ondulatoire | [0005 — Suivre le socle v2 révisé](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0005-socle-v2-revise.md) | décision | ajoutée | — 🤖 |
-| 2026-10-10 | optique-ondulatoire | [Calcul de l'interfrange des fentes d'Young](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/code/interfrange.md) | code | modifiée | — 🤖 |
-| 2026-10-10 | optique-ondulatoire | [0001 — Adopter le socle commun Memnius v1](https://github.com/Memnius-PEE/optique-ondulatoire/blob/main/registre/decisions/0001-adopter-le-socle.md) | décision | renommée | — 🤖 |
 
 _Les 10 dernières cartes et décisions ajoutées ou modifiées dans les registres des projets publics, d'après leur historique Git. 🤖 : commit fait avec un agent (ligne `Assisted-by`) ; — : commit sans compte GitHub. Toutes les cartes : [`CARTES.md`](https://github.com/Memnius-PEE/registre/blob/super-registre/CARTES.md)._
