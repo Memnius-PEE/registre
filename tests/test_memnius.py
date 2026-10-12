@@ -52,7 +52,7 @@ class Carte(DepotDeTest):
     def test_type_inconnu(self):
         code, sortie = lancer("carte", "article", "x", "--dossier", str(self.d))
         self.assertEqual(code, 2)
-        self.assertIn("decision, code, donnees ou sources", sortie)
+        self.assertIn("decision, code, donnees, sources ou documents", sortie)
 
     def test_decision_a_partir_du_modele(self):
         code, sortie = lancer("carte", "decision", "choix-du-format", "--dossier", str(self.d),
@@ -66,6 +66,11 @@ class Carte(DepotDeTest):
         code, sortie = lancer_gardes(self.d, "A4")
         self.assertEqual(code, 1, sortie)
         self.assertIn("valeurs du modèle", sortie)
+
+    def test_carte_de_document_a_partir_du_modele(self):
+        code, sortie = lancer("carte", "documents", "synthese", "--dossier", str(self.d), "--ou", "README.md")
+        self.assertEqual(code, 0, sortie)
+        self.assertIn("format:", (self.d / "registre/documents/synthese.md").read_text(encoding="utf-8"))
 
     def test_carte_existante_jamais_ecrasee(self):
         avant = (self.d / "registre/code/calcul.md").read_text(encoding="utf-8")
@@ -130,7 +135,7 @@ class Index(DepotDeTest):
     def test_contenu(self):
         index = json.loads((self.d / "registre/index.json").read_text(encoding="utf-8"))
         self.assertEqual(index["projet"], "sujet-test")
-        self.assertEqual(index["comptes"], {"decision": 1, "code": 1, "donnees": 0, "sources": 0})
+        self.assertEqual(index["comptes"], {"decision": 1, "code": 1, "donnees": 0, "sources": 0, "documents": 0})
         decision = index["cartes"][0]
         self.assertEqual((decision["id"], decision["auteurs"], decision["origine"]),
                          ("decisions/0001", ["mainteneur-test"], ["humain"]))
@@ -153,6 +158,22 @@ class Index(DepotDeTest):
         self.assertEqual((self.d / "registre/decisions/0001-adopter-le-socle.md").read_text(encoding="utf-8"), journal)
         memnius.ecrire_index(self.d)
         self.assertEqual((self.d / "registre/code/calcul.md").read_text(encoding="utf-8"), texte)
+
+    def test_decision_remplacee(self):
+        self.ecrire("registre/decisions/0002-autre-choix.md", "# 0002 — Autre choix\n\n- Date : 2026-10-11\n"
+                    "- Origine : [humain] « on change »\n- Décidé par : @mainteneur-test\n- Remplace : 0001\n\nOn change d'avis.\n")
+        memnius.ecrire_index(self.d)
+        index = json.loads((self.d / "registre/index.json").read_text(encoding="utf-8"))
+        d1 = next(c for c in index["cartes"] if c["id"] == "decisions/0001")
+        self.assertEqual(d1["remplacee_par"], ["0002"])
+        self.assertIn("(remplacée par 0002)", (self.d / "registre/INDEX.md").read_text(encoding="utf-8"))
+
+    def test_resume_d_une_decision_en_liste(self):
+        # Audit Fable (F2) : une décision écrite en liste à puces avait un résumé vide.
+        texte = ("# 0002 — Liste\n\n- Date : 2026-10-11\n- Origine : [humain] « x »\n- Décidé par : @m\n"
+                 "- Options écartées : rien\n\n- Premier point.\n- Second point.\n")
+        carte = memnius.carte_de_decision("registre/decisions/0002-liste.md", texte)
+        self.assertEqual(carte["resume"], "Premier point.")
 
     def test_carte_qui_ne_cite_rien(self):
         texte = CARTE.replace("ou: [travaux/calcul.py]", "ou: [À_REMPLIR]")
@@ -204,7 +225,7 @@ class SuperRegistre(ProjetsDeTest):
     def test_vue_generale(self):
         code, sortie = lancer("registre", "--local", str(self.racine), "--sortie", str(self.sortie))
         self.assertEqual(code, 0, sortie)
-        self.assertIn("2 projets, 4 cartes", sortie)
+        self.assertIn("2 projets (0 privés), 4 cartes", sortie)
         registre = json.loads((self.sortie / "registre.json").read_text(encoding="utf-8"))
         self.assertEqual(registre["schema"], "memnius-registre/2")
         beta = next(p for p in registre["projets"] if p["id"] == "beta")
@@ -217,6 +238,19 @@ class SuperRegistre(ProjetsDeTest):
         self.assertIn("| @Pwouette | alpha |", cartes)
         self.assertIn("[`travaux/calcul.py`](", cartes)
 
+    def test_projet_prive_absent_des_sorties_publiques(self):
+        # Audits du 2026-10-11 (H1) : un projet privé sortait dans CARTES.md, REGISTRE.md et registre.json.
+        fiche = self.racine / "beta/memnius.yaml"
+        fiche.write_text(fiche.read_text(encoding="utf-8").replace("visibilite: public", "visibilite: prive"), encoding="utf-8")
+        complet = Path(self._tmp.name) / "complet"
+        code, sortie = lancer("registre", "--local", str(self.racine), "--sortie", str(self.sortie), "--complet", str(complet))
+        self.assertEqual(code, 0, sortie)
+        for f in ("CARTES.md", "REGISTRE.md", "registre.json", "ACCUEIL.md"):
+            self.assertNotIn("beta", (self.sortie / f).read_text(encoding="utf-8"), f)
+        self.assertIn("1 projet privé non publié ici", (self.sortie / "REGISTRE.md").read_text(encoding="utf-8"))
+        self.assertIn("beta", (complet / "CARTES.md").read_text(encoding="utf-8"))
+        self.assertIn("beta", (complet / "registre.json").read_text(encoding="utf-8"))
+
     def test_projet_sans_registre(self):
         d = self.racine / "alpha"
         for f in ("registre/index.json", "registre/INDEX.md"):
@@ -226,10 +260,6 @@ class SuperRegistre(ProjetsDeTest):
         alpha = next(p for p in registre["projets"] if p["id"] == "alpha")
         self.assertEqual(alpha["conformite"]["niveau"], "non-conforme")
         self.assertIsNone(alpha["index"])
-
-
-if __name__ == "__main__":
-    unittest.main()
 
 
 class Accueil(ProjetsDeTest):
@@ -292,6 +322,17 @@ class Accueil(ProjetsDeTest):
         self.assertEqual(len(tableau), 10)
         self.assertIn("`s11`", tableau[0])  # cartes absentes de l'index (non régénéré) : nom et lien vers le commit
 
+    def test_page_publique_sans_nom_civil(self):
+        # Audit Fable (M5) : un commit sans compte GitHub affichait le nom Git sur la page publique.
+        projets = [{"id": "alpha", "fiche": {}, "depot": {"prive": False, "url": "https://github.com/o/alpha", "branche": "main"},
+                    "index": {"cartes": []}, "modifications": [
+                        {"sha": "c1", "date": "2026-10-01T00:00:00Z", "auteur": None, "agent": True,
+                         "statut": "ajoutée", "fichier": "registre/code/x.md"}]}]
+        sortie = Path(self._tmp.name) / "ACCUEIL.md"
+        memnius.ecrire_accueil({"projets": projets}, sortie)
+        ligne = next(l for l in sortie.read_text(encoding="utf-8").splitlines() if l.startswith("| 2026-"))
+        self.assertTrue(ligne.endswith("| — 🤖 |"), ligne)
+
     def test_lecture_par_l_api_github(self):
         class FauxGitHub:
             def get(self, chemin, **params):
@@ -303,7 +344,8 @@ class Accueil(ProjetsDeTest):
                         {"sha": "c2", "parents": [{}, {}], "author": {"login": "Pwouette", "type": "User"},
                          "commit": {"author": {"name": "Romain", "date": "2026-10-02T00:00:00Z"}}},
                         {"sha": "c1", "parents": [{}], "author": None,
-                         "commit": {"author": {"name": "Sans Compte", "date": "2026-10-01T00:00:00Z"}}},
+                         "commit": {"author": {"name": "Sans Compte", "date": "2026-10-01T00:00:00Z"},
+                                    "message": "Carte\n\nAssisted-by: Claude Code (Opus)"}},
                     ], {}
                 assert chemin.endswith("/commits/c1"), chemin  # robot et fusion ignorés sans être lus
                 return {"files": [{"filename": "registre/code/calcul.md", "status": "added"},
@@ -312,5 +354,102 @@ class Accueil(ProjetsDeTest):
         gh = FauxGitHub()
         modifs = memnius.modifications_github(gh, "org/alpha", "main")
         self.assertEqual(gh.params["path"], "registre")
+        self.assertTrue(all(m["agent"] for m in modifs))  # ligne Assisted-by du commit
         self.assertEqual([(m["fichier"], m["statut"], m["auteur"]) for m in modifs],
-                         [("registre/code/calcul.md", "ajoutée", "Sans Compte"), ("registre/decisions/0002-x.md", "supprimée", "Sans Compte")])
+                         [("registre/code/calcul.md", "ajoutée", None), ("registre/decisions/0002-x.md", "supprimée", None)])
+
+
+class FauxDepot:
+    """Une fausse API GitHub pour un dépôt public « org/alpha », dont on règle le ruleset et le workflow."""
+
+    REGLES_COMPLETES = [{"type": "deletion"}, {"type": "non_fast_forward"}, {"type": "pull_request"},
+                        {"type": "required_status_checks", "parameters": {"required_status_checks": [
+                            {"context": c} for c in memnius.CONTROLES_REQUIS]}}]
+    WORKFLOW = "name: Memnius\njobs:\n  gardes:\n    uses: org/registre/.github/workflows/gardes.yml@v2\n    secrets: inherit\n"
+
+    def __init__(self, regles=None, workflow=WORKFLOW, erreur=None):
+        self.regles = self.REGLES_COMPLETES if regles is None else regles
+        self.workflow, self.erreur = workflow, erreur
+
+    def get(self, chemin, brut=False, **params):
+        if self.erreur:
+            raise self.erreur
+        if "/git/trees/" in chemin:
+            return {"tree": [{"path": f, "type": "blob"} for f in
+                             ("README.md", "AGENTS.md", "memnius.yaml", "registre/decisions/0001.md", "registre/index.json",
+                              "CONTRIBUTING.md", memnius.WORKFLOW_PROJET)]}, {}
+        if chemin.endswith("/memnius.yaml"):
+            return FICHE.format(id="alpha"), {}
+        if chemin.endswith("/registre/index.json"):
+            return json.dumps({"schema": "memnius-index/1", "cartes": []}), {}
+        if chemin.endswith(memnius.WORKFLOW_PROJET):
+            return self.workflow, {}
+        if "/rules/branches/" in chemin:
+            return self.regles, {}
+        if chemin.endswith("/commits"):
+            return [], {}
+        return {"sha": "abc"}, {}
+
+    DEPOT = {"full_name": "org/alpha", "name": "alpha", "default_branch": "main", "html_url": "https://github.com/org/alpha",
+             "private": False, "pushed_at": "2026-10-11T00:00:00Z"}
+
+    def entree(self):
+        return memnius.entree_github(self, self.DEPOT, memnius.charger_vocabulaire())
+
+
+class SuperRegistreGitHub(unittest.TestCase):
+    def test_conforme(self):
+        entree = FauxDepot().entree()
+        self.assertEqual(entree["conformite"]["erreurs"], [])
+        self.assertTrue(entree["depot"]["branche_protegee"])
+
+    def test_ruleset_sans_gitleaks(self):
+        # Audits (H3, B2) : A1 tenait la branche pour protégée sans vérifier les contrôles exigés.
+        regles = FauxDepot.REGLES_COMPLETES[:3] + [{"type": "required_status_checks", "parameters": {
+            "required_status_checks": [{"context": "gardes / Gardes A2 à A7"}]}}]
+        entree = FauxDepot(regles=regles).entree()
+        self.assertIn("contrôle « gardes / A2, second filet (gitleaks) » non exigé", " ".join(entree["conformite"]["erreurs"]))
+        self.assertFalse(entree["depot"]["branche_protegee"])
+
+    def test_ruleset_sans_suppression_interdite(self):
+        entree = FauxDepot(regles=FauxDepot.REGLES_COMPLETES[1:]).entree()
+        self.assertIn("règle deletion absente", " ".join(entree["conformite"]["erreurs"]))
+
+    def test_sans_ruleset(self):
+        entree = FauxDepot(regles=[]).entree()
+        self.assertIn("n'est pas protégée", " ".join(entree["conformite"]["erreurs"]))
+
+    def test_workflow_qui_n_appelle_plus_les_gardes(self):
+        # Audit Opus (H3) : un job du même nom qui finit par « exit 0 » satisfait le contrôle requis.
+        faux = "name: Memnius\njobs:\n  gardes:\n    name: Gardes A2 à A7\n    runs-on: ubuntu-latest\n    steps:\n      - run: exit 0\n"
+        entree = FauxDepot(workflow=faux).entree()
+        self.assertIn("n'appelle plus les gardes du socle", " ".join(entree["conformite"]["erreurs"]))
+
+    def test_projet_illisible_ne_fait_pas_tomber_la_passe(self):
+        entree = memnius.entree_illisible(FauxDepot.DEPOT, RuntimeError("HTTP 502"))
+        self.assertEqual(entree["conformite"]["niveau"], "non-conforme")
+        self.assertIn("non lu : RuntimeError : HTTP 502", entree["conformite"]["erreurs"])
+
+    def test_auteur_inconnu_de_github(self):
+        class Faux:
+            def get(self, chemin, **_):
+                return (None if chemin == "/users/pwouete" else {"login": "x"}), {}
+        projet = {"index": {"cartes": [{"fichier": "registre/code/a.md", "auteurs": ["Pwouette", "pwouete", "Marie Curie"]}]},
+                  "conformite": {"erreurs": [], "avertissements": []}}
+        memnius.verifier_auteurs(Faux(), [projet])
+        self.assertEqual(projet["conformite"]["avertissements"], ["registre/code/a.md : auteur inconnu de GitHub : pwouete"])
+
+    def test_quota_epuise(self):
+        import email.message
+        import urllib.error
+        entetes = email.message.Message()
+        entetes["X-RateLimit-Remaining"] = "0"
+        entetes["X-RateLimit-Reset"] = str(int(__import__("time").time()) + 30)
+        exc = urllib.error.HTTPError("u", 403, "rate limit", entetes, None)
+        self.assertTrue(1 <= memnius.GitHub.attente_quota(exc) <= 31)
+        entetes.replace_header("X-RateLimit-Reset", str(int(__import__("time").time()) + 3600))
+        self.assertIsNone(memnius.GitHub.attente_quota(exc))
+
+
+if __name__ == "__main__":
+    unittest.main()

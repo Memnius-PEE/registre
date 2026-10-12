@@ -11,7 +11,7 @@ liens: []                      # ex. [code/nettoyage, sources/article-origine]
 # format: csv                    # (facultatif)
 # licence: CC-BY-4.0             # (facultatif)
 # taille: 2 Mo                   # (facultatif)
-# empreinte: sha256:…          # (facultatif) pour un fichier rangé hors Git (drive)
+# empreinte: sha256:…          # OBLIGATOIRE si ou est https://… ou drive:/… (sha256sum fichier)
 ---
 
 Colonnes ou variables, unités, conditions de mesure, traitements déjà appliqués.

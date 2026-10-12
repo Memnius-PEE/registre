@@ -1,40 +1,131 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "En-tête d'une carte du registre d'un projet (registre/<type>/<nom>.md)",
-  "description": "Le type de la carte (code, donnees, sources) vient du dossier où elle est rangée. Les cartes de décision sont les entrées du journal registre/decisions/, lues telles quelles.",
+  "description": "Le type de la carte (code, donnees, sources, documents) vient du dossier où elle est rangée. Les cartes de décision sont les entrées du journal registre/decisions/, lues telles quelles.",
   "type": "object",
-  "required": ["titre", "resume", "ou", "auteurs", "date"],
+  "required": [
+    "titre",
+    "resume",
+    "ou",
+    "auteurs",
+    "date"
+  ],
   "additionalProperties": false,
   "$defs": {
-    "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
-    "liste": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "liste": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
   },
   "properties": {
-    "titre": {"type": "string", "minLength": 3, "maxLength": 120},
-    "resume": {"type": "string", "minLength": 10, "maxLength": 600,
-               "description": "Ce que c'est et à quoi ça sert, en une à trois phrases"},
-    "ou": {"allOf": [{"$ref": "#/$defs/liste"}, {"minItems": 1}],
-           "description": "Où le trouver : chemin dans le dépôt (fichier ou dossier), adresse https://, ou drive:/chemin"},
-    "auteurs": {"allOf": [{"$ref": "#/$defs/liste"}, {"minItems": 1}],
-                "description": "Qui l'a fait : identifiants GitHub, ou nom pour une personne sans compte"},
-    "contributeurs": {"$ref": "#/$defs/liste", "description": "Qui y a aussi contribué (relecture, correction)"},
-    "date": {"$ref": "#/$defs/date", "description": "Date de création de l'élément décrit"},
-    "mis_a_jour": {"$ref": "#/$defs/date"},
-    "statut": {"enum": ["brouillon", "a-relire", "valide", "obsolete"],
-               "description": "a-relire : rédigée par un agent ou non relue par une autre personne"},
-    "mots_cles": {"$ref": "#/$defs/liste"},
-    "liens": {"$ref": "#/$defs/liste",
-              "description": "Autres cartes : code/nom, donnees/nom, sources/nom, decisions/0002, ou autre-projet:code/nom"},
-    "langage": {"type": "string", "description": "code : langage principal"},
-    "commande": {"type": "string", "description": "code : comment le lancer"},
-    "format": {"type": "string", "description": "donnees : format des fichiers"},
-    "licence": {"type": "string", "description": "donnees ou sources : licence ou droits"},
-    "taille": {"type": "string", "description": "donnees : volume approximatif"},
-    "empreinte": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$",
-                  "description": "donnees : empreinte d'un fichier rangé hors Git"},
-    "reference": {"type": "string", "description": "sources : référence complète"},
-    "cle_bib": {"type": "string", "description": "sources : clé dans sources/references.bib"},
-    "doi": {"type": "string"},
-    "url": {"type": "string", "pattern": "^https?://"}
+    "titre": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "resume": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 600,
+      "description": "Ce que c'est et à quoi ça sert, en une à trois phrases"
+    },
+    "ou": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/liste"
+        },
+        {
+          "minItems": 1
+        }
+      ],
+      "description": "Où le trouver : chemin dans le dépôt (fichier ou dossier), adresse https://, ou drive:/chemin"
+    },
+    "auteurs": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/liste"
+        },
+        {
+          "minItems": 1
+        }
+      ],
+      "description": "Qui l'a fait : identifiants GitHub, ou nom pour une personne sans compte"
+    },
+    "contributeurs": {
+      "$ref": "#/$defs/liste",
+      "description": "Qui y a aussi contribué (relecture, correction)"
+    },
+    "date": {
+      "$ref": "#/$defs/date",
+      "description": "Date de création de l'élément décrit"
+    },
+    "mis_a_jour": {
+      "$ref": "#/$defs/date"
+    },
+    "statut": {
+      "enum": [
+        "brouillon",
+        "a-relire",
+        "valide",
+        "obsolete"
+      ],
+      "description": "a-relire : rédigée par un agent ou non relue par une autre personne"
+    },
+    "mots_cles": {
+      "$ref": "#/$defs/liste"
+    },
+    "liens": {
+      "$ref": "#/$defs/liste",
+      "description": "Autres cartes : code/nom, donnees/nom, sources/nom, decisions/0002, ou autre-projet:code/nom"
+    },
+    "langage": {
+      "type": "string",
+      "description": "code : langage principal"
+    },
+    "commande": {
+      "type": "string",
+      "description": "code : comment le lancer"
+    },
+    "format": {
+      "type": "string",
+      "description": "donnees : format des fichiers ; documents : genre (note, synthèse, compte rendu, exposé, livrable…)"
+    },
+    "licence": {
+      "type": "string",
+      "description": "donnees ou sources : licence ou droits"
+    },
+    "taille": {
+      "type": "string",
+      "description": "donnees : volume approximatif"
+    },
+    "empreinte": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "donnees : empreinte d'un fichier rangé hors Git"
+    },
+    "reference": {
+      "type": "string",
+      "description": "sources : référence complète"
+    },
+    "cle_bib": {
+      "type": "string",
+      "description": "sources : clé dans sources/references.bib"
+    },
+    "doi": {
+      "type": "string",
+      "description": "sources ou documents : DOI"
+    },
+    "url": {
+      "type": "string",
+      "pattern": "^https?://"
+    }
   }
 }

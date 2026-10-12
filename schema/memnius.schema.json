@@ -210,6 +210,22 @@
         }
       }
     },
+    "registre": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Réglages du registre du projet (règle C11, garde A7)",
+      "properties": {
+        "a_couvrir": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Dossiers ou fichiers dont chaque fichier devrait être décrit par une carte (avertissement de A7). Par défaut : tout fichier rangé dans un dossier, hors registre/ et dossiers cachés."
+        }
+      }
+    },
     "licence": {
       "type": "string",
       "minLength": 2

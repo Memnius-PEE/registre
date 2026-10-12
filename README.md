@@ -27,14 +27,14 @@ ce qui était auparavant dans deux dépôts (`regles` et l'ancien `registre`, d�
 ## Le registre de chaque projet
 
 Chaque dépôt de projet a un dossier `registre/` de même structure (règle C11, garde A7) : une **carte** par
-code, jeu de données ou source notable, qui dit ce que c'est, qui l'a fait et où le trouver. Le journal
+code, jeu de données, source ou document notable, qui dit ce que c'est, qui l'a fait et où le trouver. Le journal
 des décisions y est aussi, dans `registre/decisions/` : chaque entrée est une carte de décision. Un script
 en tire l'index du projet et rend cliquables, dans chaque carte, les fichiers qu'elle cite :
 
 ```bash
 python3 outils/memnius.py init ../mon-projet --titre "Mon projet" --mainteneur moi   # fichiers exigés, rien n'est remplacé
 python3 outils/memnius.py carte code calcul-interfrange --dossier ../mon-projet --ou travaux/interfrange.py --auteur moi
-python3 outils/memnius.py index ../mon-projet        # écrit registre/INDEX.md, registre/index.json et les liens des cartes (la CI le fait sur chaque pull request)
+python3 outils/memnius.py index ../mon-projet        # écrit registre/INDEX.md, registre/index.json et les liens des cartes (la CI le fait après chaque fusion)
 python3 outils/memnius.py verifier ../mon-projet     # gardes A3 et A7
 python3 outils/gardes.py ../mon-projet               # toutes les gardes, comme la CI
 ```

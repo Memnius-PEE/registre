@@ -1,7 +1,12 @@
 # Super-registre : chaque nuit et à la demande (onglet Actions → Run workflow), lit la fiche, l'index et
 # l'historique du registre de chaque projet de l'organisation, puis publie REGISTRE.md, CARTES.md,
 # registre.json et ACCUEIL.md sur la branche « super-registre » de ce dépôt, et ACCUEIL.md comme page
-# d'accueil de l'organisation (profile/README.md du dépôt .github).
+# d'accueil de l'organisation (profile/README.md du dépôt .github). Ces sorties sont publiques : un projet
+# privé n'y figure jamais (C7). La vue complète, projets privés compris, ne va que dans le dépôt privé
+# registre-prive, s'il existe (secret MEMNIUS_PRIVE_CLE, créé par creer-vue-complete.sh du kit).
+#
+# Secrets : ils vivent dans l'environnement « super-registre », que seule la branche main peut utiliser.
+# Un workflow modifié dans une autre branche ou une pull request ne peut donc pas les lire (décision 0020).
 #
 # Pourquoi une branche à part : main est protégée (garde A1) et n'accepte que des pull requests relues ;
 # les fichiers générés vont donc sur « super-registre », que le ruleset de main ne couvre pas.
@@ -9,11 +14,11 @@
 # Lecture des projets : pour les dépôts publics, le jeton du workflow suffit. Pour lire aussi les dépôts
 # privés, installer la GitHub App dédiée « memnius-registre » (décision 0007 : permissions Contents et
 # Metadata en lecture seule, sur tous les dépôts de l'organisation) et renseigner la variable
-# MEMNIUS_APP_ID et le secret MEMNIUS_APP_CLE (clé privée de l'App).
+# MEMNIUS_APP_ID et le secret MEMNIUS_APP_CLE (clé privée de l'App) de l'environnement.
 #
 # Page d'accueil : le jeton du workflow n'écrit que dans ce dépôt. Pour écrire dans le dépôt .github, une
 # clé de déploiement avec droit d'écriture sur .github seulement (créée par creer-accueil.sh du kit) :
-# sa clé publique est déclarée dans .github, sa clé privée est le secret MEMNIUS_ACCUEIL_CLE de ce dépôt.
+# sa clé publique est déclarée dans .github, sa clé privée est le secret MEMNIUS_ACCUEIL_CLE de l'environnement.
 # Sans ce secret, l'étape ne fait rien ; ACCUEIL.md reste consultable sur la branche super-registre.
 name: Super-registre
 on:
@@ -23,18 +28,24 @@ on:
 
 permissions:
   contents: write
+  issues: write   # ticket « Super-registre en échec » quand une passe échoue
 
 concurrency: registre
+
+env:
+  # Clé d'hôte publiée de github.com (https://docs.github.com/fr/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints)
+  GITHUB_COM_ED25519: "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
 
 jobs:
   construire:
     runs-on: ubuntu-latest
+    environment: super-registre
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install --quiet pyyaml jsonschema
+      - run: pip install --quiet pyyaml==6.0.2 jsonschema==4.23.0
       - name: Jeton de lecture de l'App memnius-registre
         id: app
         if: ${{ vars.MEMNIUS_APP_ID != '' }}
@@ -44,9 +55,17 @@ jobs:
           private-key: ${{ secrets.MEMNIUS_APP_CLE }}
           owner: ${{ github.repository_owner }}
       - name: Construire
+        id: construire
         env:
           GITHUB_TOKEN: ${{ steps.app.outputs.token || github.token }}
-        run: python3 outils/memnius.py registre --github "${{ github.repository_owner }}" --sortie /tmp/sortie
+          MEMNIUS_LECTURE: ${{ steps.app.outputs.token && 'app' || 'workflow' }}
+        run: |
+          set +e
+          python3 outils/memnius.py registre --github "${{ github.repository_owner }}" --sortie /tmp/sortie --complet /tmp/complet
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          # 3 : des projets n'ont pas pu être lus ; les sorties sont écrites quand même, le ticket le dira.
+          [ "$code" = 0 ] || [ "$code" = 3 ]
       - name: Publier sur la branche super-registre
         run: |
           git config user.name "github-actions[bot]"
@@ -61,6 +80,8 @@ jobs:
           git add REGISTRE.md CARTES.md registre.json ACCUEIL.md
           git diff --cached --quiet || git commit --quiet -m "Super-registre regénéré (exécution ${{ github.run_id }})"
           git push --quiet origin super-registre
+      - name: Clé d'hôte de github.com
+        run: install -m 700 -d ~/.ssh && printf '%s\n' "$GITHUB_COM_ED25519" > ~/.ssh/known_hosts
       - name: Publier la page d'accueil de l'organisation (dépôt .github)
         env:
           CLE: ${{ secrets.MEMNIUS_ACCUEIL_CLE }}
@@ -70,8 +91,8 @@ jobs:
             echo "::notice::Secret MEMNIUS_ACCUEIL_CLE absent : page d'accueil non publiée (voir creer-accueil.sh du kit)."
             exit 0
           fi
-          install -m 700 -d ~/.ssh && install -m 600 /dev/null ~/.ssh/accueil && printf '%s\n' "$CLE" > ~/.ssh/accueil
-          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/accueil -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          install -m 600 /dev/null ~/.ssh/accueil && printf '%s\n' "$CLE" > ~/.ssh/accueil
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/accueil -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
           git clone --quiet --depth 1 "$DEPOT" /tmp/accueil
           mkdir -p /tmp/accueil/profile && cp /tmp/sortie/ACCUEIL.md /tmp/accueil/profile/README.md
           cd /tmp/accueil
@@ -80,3 +101,35 @@ jobs:
           git add profile/README.md
           git diff --cached --quiet || git commit --quiet -m "Page d'accueil regénérée par le super-registre (exécution ${{ github.run_id }})"
           git push --quiet origin HEAD
+      - name: Publier la vue complète (dépôt privé registre-prive)
+        env:
+          CLE: ${{ secrets.MEMNIUS_PRIVE_CLE }}
+          DEPOT: git@github.com:${{ github.repository_owner }}/registre-prive.git
+        run: |
+          if [ -z "$CLE" ]; then
+            echo "::notice::Secret MEMNIUS_PRIVE_CLE absent : vue complète non publiée (voir creer-vue-complete.sh du kit)."
+            exit 0
+          fi
+          install -m 600 /dev/null ~/.ssh/prive && printf '%s\n' "$CLE" > ~/.ssh/prive
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/prive -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          git clone --quiet --depth 1 "$DEPOT" /tmp/prive
+          cp /tmp/complet/REGISTRE.md /tmp/complet/CARTES.md /tmp/complet/registre.json /tmp/prive/
+          cd /tmp/prive
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add REGISTRE.md CARTES.md registre.json
+          git diff --cached --quiet || git commit --quiet -m "Vue complète regénérée par le super-registre (exécution ${{ github.run_id }})"
+          git push --quiet origin HEAD
+      - name: Signaler un échec (ticket « Super-registre en échec »)
+        if: ${{ failure() || steps.construire.outputs.code == '3' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LIEN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          titre="Super-registre en échec"
+          numero=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "in:title \"$titre\"" --json number --jq '.[0].number // empty')
+          texte="La passe du $(date -u +%F) n'a pas abouti ou n'a pas lu tous les projets : $LIEN"
+          if [ -n "$numero" ]; then gh issue comment "$numero" -R "$GITHUB_REPOSITORY" --body "$texte"
+          else gh issue create -R "$GITHUB_REPOSITORY" --title "$titre" --body "$texte (fermer ce ticket une fois corrigé)"
+          fi
+          exit 1
