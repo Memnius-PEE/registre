@@ -1,6 +1,6 @@
 # Toutes les cartes des projets Memnius
 
-_Généré le 2026-10-11T09:00:31+00:00 à partir du `registre/index.json` de chaque projet. Ne pas éditer. Vue par projet : [REGISTRE.md](REGISTRE.md)._
+_Généré le 2026-10-12T09:21:54+00:00 à partir du `registre/index.json` de chaque projet. Ne pas éditer. Vue par projet : [REGISTRE.md](REGISTRE.md)._
 
 ## Décisions (9)
 

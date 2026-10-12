@@ -1,6 +1,6 @@
 {
   "schema": "memnius-registre/2",
-  "genere_le": "2026-10-11T09:00:31+00:00",
+  "genere_le": "2026-10-12T09:21:54+00:00",
   "source": "https://github.com/Memnius-PEE",
   "projets": [
     {
@@ -61,7 +61,7 @@
         "url": "https://github.com/Memnius-PEE/optique-ondulatoire",
         "branche": "main",
         "dernier_commit": "a213684437a37d6d3d1c1764c14ba8f32ae23d2e",
-        "derniere_activite": "2026-10-11T00:12:22Z",
+        "derniere_activite": "2026-10-11T10:15:18Z",
         "archive_forge": false,
         "prive": false,
         "etoiles": 0,
@@ -377,7 +377,7 @@
         "url": "https://github.com/Memnius-PEE/horloge-hello",
         "branche": "main",
         "dernier_commit": "ea01d4e55176cc73a0c34bd0d5c6843e06eece9f",
-        "derniere_activite": "2026-10-11T00:04:06Z",
+        "derniere_activite": "2026-10-11T10:15:01Z",
         "archive_forge": false,
         "prive": false,
         "etoiles": 0,
