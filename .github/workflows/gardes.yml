@@ -5,12 +5,13 @@
 #     gardes:
 #       uses: Memnius-PEE/registre/.github/workflows/gardes.yml@v2
 #       secrets: inherit
-# Bloque la fusion si le socle n'est pas respecté (le ruleset du projet exige ce contrôle, garde A1).
-# Sur une pull request du dépôt lui-même, écrit aussi l'index du registre (règle C11) et le commite sur la
-# branche de la pull request. Il pousse avec la clé de déploiement du projet (secret MEMNIUS_INDEX_CLE, posé par
-# publier-projet.sh) : un tel commit déclenche une nouvelle exécution pull_request, dont le contrôle compte pour
-# le ruleset. Poussé avec le jeton du workflow, il resterait « en attente d'approbation » et la relance par
-# workflow_dispatch ne compte pas pour le ruleset : sans la clé, la CI ne commite donc rien et demande l'index.
+# Bloque la fusion si le socle n'est pas respecté (le ruleset du projet exige les contrôles « gardes » et
+# « gitleaks », garde A1).
+# Après chaque fusion (push sur main), écrit aussi l'index du registre et les blocs de liens des cartes (règle
+# C11, décision 0021) et les pousse sur main avec la clé de déploiement du projet, dispensée du ruleset. Une pull
+# request ne touche donc jamais l'index : pas de conflit entre deux pull requests, et une pull request venue
+# d'une copie (fork) est indexée comme les autres. La clé privée est le secret MEMNIUS_INDEX_CLE de
+# l'environnement « index » du projet, réservé à main (publier-projet.sh le crée) : une branche ne peut pas la lire.
 name: Gardes Memnius
 on:
   workflow_call:
@@ -19,10 +20,6 @@ on:
         description: Étiquette du socle (dépôt registre de l'organisation)
         type: string
         default: v2
-    secrets:
-      MEMNIUS_INDEX_CLE:
-        description: Clé privée de la clé de déploiement en écriture du projet (commit de l'index, règle C11)
-        required: false
 
 permissions:
   contents: read
@@ -39,7 +36,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install --quiet pyyaml jsonschema
+      - run: pip install --quiet pyyaml==6.0.2 jsonschema==4.23.0
       - name: Outils communs
         run: git clone --quiet --depth 1 --branch "${{ inputs.socle }}" "https://github.com/${{ github.repository_owner }}/registre.git" /tmp/registre-commun
       - name: Gardes
@@ -47,14 +44,22 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           PRINCIPALE: ${{ github.event.repository.default_branch }}
         run: |
-          # Relance après le commit de l'index : pas de base dans l'événement, on prend le point de départ de la branche.
+          # Sans base dans l'événement (lancement à la main), on prend le point de départ de la branche.
           if [ -z "$BASE" ]; then BASE=$(git merge-base "origin/$PRINCIPALE" HEAD); fi
-          python3 /tmp/registre-commun/outils/gardes.py --base "$BASE" .
+          set +e
+          python3 /tmp/registre-commun/outils/gardes.py --base "$BASE" . | tee /tmp/bilan.txt
+          code=${PIPESTATUS[0]}
+          # Le bilan s'affiche aussi sur la page de l'exécution, sans ouvrir le journal.
+          { echo "### Gardes du socle Memnius"; echo; echo '```'; cat /tmp/bilan.txt; echo '```'
+            [ "$code" = 0 ] || echo "Chaque ligne [FIRE] dit quoi corriger ; voir REGLES.md du dépôt registre."; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$code"
 
   index:
     name: Index du registre (C11)
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
+    environment: index
+    concurrency: index-${{ github.repository }}
     steps:
       - name: Clé de déploiement présente ?
         id: cle
@@ -63,38 +68,37 @@ jobs:
         run: echo "presente=$([ -n "$CLE" ] && echo oui || echo non)" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ssh-key: ${{ steps.cle.outputs.presente == 'oui' && github.event.pull_request.head.repo.full_name == github.repository && secrets.MEMNIUS_INDEX_CLE || '' }}
+          ref: ${{ github.event.repository.default_branch }}
+          ssh-key: ${{ secrets.MEMNIUS_INDEX_CLE }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install --quiet pyyaml jsonschema
+      - run: pip install --quiet pyyaml==6.0.2 jsonschema==4.23.0
       - name: Outils communs
         run: git clone --quiet --depth 1 --branch "${{ inputs.socle }}" "https://github.com/${{ github.repository_owner }}/registre.git" /tmp/registre-commun
-      - name: Régénérer l'index et les blocs de liens
-        run: python3 /tmp/registre-commun/outils/memnius.py index .
-      - name: Commiter sur la pull request
+      - name: Régénérer l'index et le pousser sur la branche principale
         env:
-          BRANCHE: ${{ github.event.pull_request.head.ref }}
-          SOURCE: ${{ github.event.pull_request.head.repo.full_name }}
+          BRANCHE: ${{ github.event.repository.default_branch }}
           CLE: ${{ steps.cle.outputs.presente }}
         run: |
-          git add -A registre
-          if git diff --cached --quiet; then echo "index déjà à jour"; exit 0; fi
-          if [ "$SOURCE" != "${{ github.repository }}" ]; then
-            echo "::warning::pull request venant d'une copie : index non commité, la prochaine pull request du dépôt le mettra à jour"
-            exit 0
-          fi
-          if [ "$CLE" != oui ]; then
-            echo "::error::index du registre périmé et pas de secret MEMNIUS_INDEX_CLE : lancer « memnius.py index . » et commiter, ou poser la clé (publier-projet.sh --regler)"
-            exit 1
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --quiet -m "Index du registre régénéré par la CI (règle C11)"
-          git push --quiet origin "HEAD:$BRANCHE"
-          echo "index commité : les gardes repassent sur ce commit"
+          # Une autre fusion peut arriver entre-temps : on repart alors de la nouvelle tête, trois fois au plus.
+          for essai in 1 2 3; do
+            git fetch --quiet origin "$BRANCHE" && git reset --quiet --hard "origin/$BRANCHE"
+            python3 /tmp/registre-commun/outils/memnius.py index .
+            git add -A registre
+            if git diff --cached --quiet; then echo "index déjà à jour"; exit 0; fi
+            if [ "$CLE" != oui ]; then
+              echo "::error::index du registre périmé et pas de secret MEMNIUS_INDEX_CLE dans l'environnement « index » : lancer publier-projet.sh NOM --regler"
+              exit 1
+            fi
+            git commit --quiet -m "Index du registre régénéré par la CI (règle C11)"
+            if git push --quiet origin "HEAD:$BRANCHE"; then echo "index poussé sur $BRANCHE"; exit 0; fi
+            echo "poussée refusée (essai $essai) : nouvelle tentative"
+          done
+          echo "::error::index non poussé après trois essais"
+          exit 1
 
   secrets:
     name: A2, second filet (gitleaks)

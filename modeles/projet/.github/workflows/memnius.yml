@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
 permissions:
-  contents: read       # la CI commite l'index du registre avec la clé de déploiement du projet (secret MEMNIUS_INDEX_CLE)
+  contents: read       # après la fusion, la CI pousse l'index du registre avec la clé de déploiement du projet (environnement index)
 jobs:
   gardes:
     uses: Memnius-PEE/registre/.github/workflows/gardes.yml@v2

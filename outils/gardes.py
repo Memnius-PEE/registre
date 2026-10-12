@@ -10,9 +10,12 @@ Usage :
 
 Sortie : une ligne « [ ok ] » ou « [FIRE] » par garde, puis un bilan. Code de sortie 1 si une garde
 a sonné ou n'a pas pu tourner : une garde qui n'a pas tourné compte comme un échec, jamais comme un succès.
+Avec --base, A6 mesure aussi chaque fichier ajouté dans un commit intermédiaire de la branche : un gros fichier
+ajouté puis retiré entrerait sinon dans l'historique à la fusion.
 A2 et A6 n'utilisent que la bibliothèque standard ; A4 tolère une coquille corrigée (C2) ; A3, A5 et A7 ont besoin de PyYAML.
 """
 import argparse
+import difflib
 import os
 import re
 import subprocess
@@ -69,6 +72,11 @@ MOTIFS_SECRETS = [
     ("clé privée", re.compile(r"-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----")),
     ("jeton GitLab", re.compile(r"\bglpat-[A-Za-z0-9_\-]{20,}")),
     ("jeton GitHub", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{36,}")),
+    ("jeton GitHub", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{22,}")),
+    ("jeton JWT", re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}")),
+    ("en-tête Authorization", re.compile(r"\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*")),
+    ("clé d'API Google", re.compile(r"\bAIza[0-9A-Za-z_\-]{35}\b")),
+    ("jeton Hugging Face", re.compile(r"\bhf_[A-Za-z0-9]{30,}\b")),
     ("clé AWS", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("jeton Slack", re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}")),
     ("clé d'API de modèle", re.compile(r"\bsk-(?:ant-|proj-)?[A-Za-z0-9_\-]{20,}")),
@@ -154,17 +162,59 @@ def controler_entree(f, texte):
     return defauts
 
 
+CHAMP_TOUT = re.compile(r"^-\s*\**([^*:\n]{1,40}?)\**\s*:\s*(.*)$", re.M)
+CHAMPS_FIGES = ("Date", "Origine", "Décidé par", "Remplace")
+MOT = re.compile(r"\w+")
+COQUILLE_MAX_CARACTERES = 20  # caractères (hors blancs) ajoutés ou retirés par une correction de coquille
+COQUILLE_MAX_MOTS = 4         # mots corrigés au plus
+
+
+def ecart_coquille(avant, apres):
+    """None si le passage d'avant à apres n'est qu'une coquille, sinon la raison du refus. Une coquille
+    corrige l'orthographe ou la ponctuation de quelques mots : elle n'ajoute ni ne retire aucun mot, ne
+    change aucun nombre, ni le nom ou la valeur des champs Date, Origine, Décidé par et Remplace."""
+    champs = lambda texte: {m.group(1).strip(): m.group(2).strip() for m in CHAMP_TOUT.finditer(texte)}  # noqa: E731
+    c_avant, c_apres = champs(avant), champs(apres)
+    if set(c_avant) != set(c_apres):
+        return "champ ajouté ou retiré"
+    for c in CHAMPS_FIGES:
+        if c_avant.get(c) != c_apres.get(c):
+            return f"champ « {c} » modifié"
+    mots_avant, mots_apres = MOT.findall(avant), MOT.findall(apres)
+    corriges = 0
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, mots_avant, mots_apres, autojunk=False).get_opcodes():
+        if op == "equal":
+            continue
+        if op != "replace" or i2 - i1 != j2 - j1:
+            return "mots ajoutés ou retirés"
+        for a, b in zip(mots_avant[i1:i2], mots_apres[j1:j2]):
+            corriges += 1
+            if any(ch.isdigit() for ch in a + b):
+                return f"nombre changé ({a} → {b})"
+            if difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio() < 0.6:
+                return f"mot remplacé ({a} → {b})"
+    if corriges > COQUILLE_MAX_MOTS:
+        return f"{corriges} mots corrigés (au plus {COQUILLE_MAX_MOTS})"
+    sans_blancs = lambda texte: re.sub(r"\s+", "", texte)  # noqa: E731
+    change = sum(max(i2 - i1, j2 - j1) for op, i1, i2, j1, j2 in difflib.SequenceMatcher(
+        None, sans_blancs(avant), sans_blancs(apres), autojunk=False).get_opcodes() if op != "equal")
+    if change > COQUILLE_MAX_CARACTERES:
+        return f"{change} caractères changés (au plus {COQUILLE_MAX_CARACTERES})"
+    return None
+
+
 def coquille(dossier, base, f):
     """Une entrée publiée peut être retouchée pour une coquille (C2) : chaque commit qui la modifie depuis
-    la base dit « coquille » dans son message, et Date, Origine et Décidé par restent identiques."""
+    la base dit « coquille » dans son message, et la retouche reste une coquille (ecart_coquille).
+    Renvoie None si c'en est une, sinon la raison du refus."""
     messages = git(dossier, "log", "--format=%B%x00", f"{base}..HEAD", "--", f).decode(errors="replace")
     messages = [m for m in messages.split("\0") if m.strip()]
     if not messages or not all("coquille" in m.lower() for m in messages):
-        return False
+        return "pas de commit « coquille »"
     avant = git(dossier, "show", f"{base}:{f}").decode(errors="replace")
     apres = (dossier / f).read_text(encoding="utf-8", errors="replace")
-    champs = lambda texte: {m.group(1): m.group(2).strip() for m in CHAMP.finditer(texte)}  # noqa: E731
-    return champs(avant) == champs(apres)
+    raison = ecart_coquille(avant, apres)
+    return None if raison is None else f"plus qu'une coquille : {raison}"
 
 
 def garde_a4(dossier, fichiers, base=None, **_):
@@ -197,11 +247,13 @@ def garde_a4(dossier, fichiers, base=None, **_):
             if NOM_ENTREE.match(ancien) and etat[0] in "MDRT":
                 if RESTES_GABARIT.search(git(dossier, "show", f"{base}:{ancien}").decode(errors="replace")):
                     continue  # entrée encore à remplir : pas encore publiée
-                if etat[0] == "M" and coquille(dossier, base, ancien):
+                raison = coquille(dossier, base, ancien) if etat[0] == "M" else ""
+                if raison is None:
                     coquilles += 1
                     continue
                 action = {"M": "modifiée", "D": "supprimée", "R": "renommée", "T": "changée de type"}[etat[0]]
-                defauts.append(f"{ancien} : entrée publiée {action} (C2 : corriger par une nouvelle entrée)")
+                detail = f", {raison}" if raison and raison != "pas de commit « coquille »" else ""
+                defauts.append(f"{ancien} : entrée publiée {action}{detail} (C2 : corriger par une nouvelle entrée)")
         portee = f"comparé à {base[:10]}" + (f", {coquilles} coquille(s) corrigée(s)" if coquilles else "")
     if defauts:
         raise Feu("; ".join(defauts))
@@ -212,6 +264,19 @@ def garde_a4(dossier, fichiers, base=None, **_):
 
 FICHIERS_GOUVERNANCE = re.compile(r"^(README\.md|registre/README\.md|AGENTS\.md|CLAUDE\.md|CONTRIBUTING\.md|PASSATION\.md|REGLES\.md|registre/decisions/[^/]+\.md)$")
 RENVOI = re.compile(r"(?<![\w/.#@-])([CROA])(\d{1,2})(?![\w])")
+# Un code n'est lu comme renvoi à une règle que dans son contexte : ligne qui parle de règle, garde, option ou
+# socle, ou code encadré (parenthèses, crochets, gras, code) ou dans une plage « C1–C11 ». « format A4 » ou
+# « vitamine C6 » ne sont pas des renvois.
+CONTEXTE_REGLE = re.compile(r"(?i)\b(r[èe]gles?|gardes?|options?|socle|abrog\w*)\b")
+AVANT_ENCADRE = re.compile(r"[(\[*`]\s*$|[–-]\s*$")
+APRES_ENCADRE = re.compile(r"^\s*[)\]*`]|^\s*[–-]\s*[CROA]\d")
+
+
+def est_renvoi(ligne, m):
+    if CONTEXTE_REGLE.search(ligne):
+        return True
+    avant, apres = ligne[:m.start()], ligne[m.end():]
+    return bool(AVANT_ENCADRE.search(avant) or APRES_ENCADRE.search(apres))
 
 
 def garde_a5(dossier, fichiers, **_):
@@ -225,6 +290,8 @@ def garde_a5(dossier, fichiers, **_):
         historique = f.startswith(JOURNAL)
         for n, ligne in enumerate((dossier / f).read_text(encoding="utf-8", errors="replace").splitlines(), 1):
             for m in RENVOI.finditer(ligne):
+                if not est_renvoi(ligne, m):
+                    continue
                 code = m.group(1) + m.group(2)
                 compte += 1
                 if code not in connus:
@@ -258,7 +325,32 @@ def taille_lfs(dossier, sha):
     return int(m.group(1)) if m else None
 
 
-def garde_a6(dossier, fichiers, **_):
+def gros_dans_l_historique(dossier, base, seuil):
+    """{chemin : taille} des fichiers de plus de seuil ajoutés par un commit de base..HEAD (pointeurs LFS
+    compris) : fusionnés, ils entreraient pour toujours dans l'historique, même retirés depuis."""
+    objets = {}
+    for ligne in git(dossier, "rev-list", "--objects", f"{base}..HEAD").decode(errors="replace").splitlines():
+        sha, _, chemin = ligne.partition(" ")
+        if chemin:
+            objets.setdefault(sha, chemin)
+    if not objets:
+        return {}
+    r = subprocess.run(["git", "-C", str(dossier), "cat-file", "--batch-check=%(objectname) %(objecttype) %(objectsize)"],
+                       input="\n".join(objets) + "\n", capture_output=True, text=True, check=True)
+    gros = {}
+    for ligne in r.stdout.splitlines():
+        sha, type_, taille = ligne.split()
+        if type_ != "blob":
+            continue
+        taille = int(taille)
+        if taille < 1024 and (vraie := taille_lfs(dossier, sha)) is not None:
+            taille = vraie
+        if taille > seuil:
+            gros[objets[sha]] = max(taille, gros.get(objets[sha], 0))
+    return gros
+
+
+def garde_a6(dossier, fichiers, base=None, **_):
     """Git LFS n'est pas une échappatoire (décision 0017) : on mesure le fichier, pas son pointeur."""
     seuil = SEUIL_GROS_FICHIER
     try:
@@ -285,6 +377,9 @@ def garde_a6(dossier, fichiers, **_):
     else:
         tailles = {f: (dossier / f).stat().st_size for f in fichiers}
     gros = [f"{f} ({t / 1_000_000:.1f} Mo)" for f, t in sorted(tailles.items()) if t > seuil]
+    if base and set(base) != {"0"} and est_depot_git(dossier):
+        gros += [f"{f} ({t / 1_000_000:.1f} Mo, dans un commit de la branche)"
+                 for f, t in sorted(gros_dans_l_historique(dossier, base, seuil).items()) if f not in tailles or tailles[f] != t]
     if gros:
         raise Feu(f"au-delà de {seuil / 1_000_000:g} Mo, Git LFS compris (à mettre dans le drive commun) : " + ", ".join(gros))
     return f"{len(tailles)} fichiers sous {seuil / 1_000_000:g} Mo"

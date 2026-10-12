@@ -19,6 +19,7 @@ que l'on contribue souvent ou une seule fois, en personne ou par un agent IA.
 | Pourquoi une règle existe | [le journal des décisions du socle](https://github.com/Memnius-PEE/registre/tree/main/decisions) |
 | La liste des projets | [`REGISTRE.md`](https://github.com/Memnius-PEE/registre/blob/super-registre/REGISTRE.md) (mis à jour chaque nuit) |
 | Qui a fait quoi, et où le trouver | [`CARTES.md`](https://github.com/Memnius-PEE/registre/blob/super-registre/CARTES.md), et dans chaque projet `registre/INDEX.md` |
+| Chercher un mot dans toutes les cartes | [la recherche de code GitHub](https://github.com/search?q=org%3AMemnius-PEE+path%3Aregistre%2F&type=code), en ajoutant le mot cherché |
 | Écrire une carte ou une décision | [les modèles de cartes](https://github.com/Memnius-PEE/registre/tree/main/modeles/cartes) et `python3 outils/memnius.py carte` |
 
 ## Les règles fondamentales, en bref
@@ -34,9 +35,10 @@ que l'on contribue souvent ou une seule fois, en personne ou par un agent IA.
 - **Un fait porte sa source**, ou la mention `[non vérifié]` (C5).
 - **Rien ne sort sans accord.** Aucun secret ni donnée personnelle dans un dépôt ; un agent ne publie ni
   n'envoie rien sans l'accord explicite d'un mainteneur (C7).
-- **Chaque projet tient son registre** : une carte par code, jeu de données ou source notable, qui dit ce
-  que c'est, qui l'a fait et où le trouver. L'index est écrit par la CI (C11).
-- **Les gros fichiers vont dans le drive commun** : au-delà de 10 Mo, un fichier est refusé, même par Git LFS.
+- **Chaque projet tient son registre** : une carte par code, jeu de données, source ou document notable,
+  qui dit ce que c'est, qui l'a fait et où le trouver. L'index est écrit par la CI après la fusion (C11).
+- **Les gros fichiers vont dans le drive commun** : au-delà de 10 Mo, un fichier est refusé, même par Git LFS
+  (en attendant le drive : stockage institutionnel ou Zenodo, avec une carte de données et son empreinte).
 
 Les gardes automatiques (A1 à A7) vérifient tout cela sur chaque pull request. Un agent répond dans la
 langue de la personne qui lui parle (C10).

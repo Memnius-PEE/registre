@@ -32,9 +32,9 @@ regles:
   O8: {titre: Correction à côté, niveau: option}
 gardes:
   A1: {titre: Branche protégée, ou: ruleset GitHub (contrôlé par le super-registre)}
-  A2: {titre: Secrets, ou: CI et pre-commit}
+  A2: {titre: Secrets, ou: CI (gardes et gitleaks requis) et pre-commit}
   A3: {titre: Structure, ou: CI}
   A4: {titre: Journal en ajout seul, ou: CI}
   A5: {titre: Renvois aux règles, ou: CI}
   A6: {titre: Gros fichiers, ou: CI et pre-commit, seuil_octets: 10000000, lfs_accepte: false}
-  A7: {titre: Registre du projet, ou: CI (l'index est écrit par la CI sur la pull request), depuis: v2}
+  A7: {titre: Registre du projet, ou: CI (l'index est écrit par la CI après la fusion), depuis: v2}
