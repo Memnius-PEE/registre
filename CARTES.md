@@ -1,6 +1,6 @@
 # Toutes les cartes des projets Memnius
 
-_Généré le 2026-10-27T07:59:05+00:00 à partir du `registre/index.json` de chaque projet. Ne pas éditer. Vue par projet : [REGISTRE.md](REGISTRE.md). Chercher un mot dans toutes les cartes : recherche de code GitHub `org:Memnius-PEE path:registre/ le-mot`._
+_Généré le 2026-10-28T08:41:46+00:00 à partir du `registre/index.json` de chaque projet. Ne pas éditer. Vue par projet : [REGISTRE.md](REGISTRE.md). Chercher un mot dans toutes les cartes : recherche de code GitHub `org:Memnius-PEE path:registre/ le-mot`._
 
 ## Décisions (9)
 
